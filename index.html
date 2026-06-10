@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeTrainer</title>
+<style>
+  /* ============ TEMAS / PALETAS ============ */
+  :root {
+    --bg: #323437;
+    --bg-alt: #2c2e31;
+    --main: #e2b714;       /* color de acento / letras correctas-caret */
+    --caret: #e2b714;
+    --text: #d1d0c5;       /* texto a tipear (pendiente) */
+    --sub: #646669;        /* texto secundario / sin tipear */
+    --correct: #d1d0c5;    /* letra correcta */
+    --error: #ca4754;      /* letra incorrecta */
+    --error-extra: #7e2a33;
+    --line: #646669;
+    --font: 'Roboto Mono', monospace;
+    --font-size: 28px;
+  }
+  [data-theme="light"] {
+    --bg: #eaeaea; --bg-alt: #e0e0e0; --main: #aa9100; --caret: #aa9100;
+    --text: #4a4a4a; --sub: #aaaaaa; --correct: #333; --error: #d62246; --error-extra: #f5b8c2; --line: #bbb;
+  }
+  [data-theme="ocean"] {
+    --bg: #1b2b34; --bg-alt: #16242b; --main: #6699cc; --caret: #6699cc;
+    --text: #cdd3de; --sub: #65737e; --correct: #cdd3de; --error: #ec5f67; --error-extra: #6b2d31; --line: #4f5b66;
+  }
+  [data-theme="rose"] {
+    --bg: #2a1e26; --bg-alt: #241a21; --main: #f48fb1; --caret: #f48fb1;
+    --text: #e8d5dd; --sub: #7d6470; --correct: #e8d5dd; --error: #ff5370; --error-extra: #6e2a3a; --line: #5c4452;
+  }
+  [data-theme="matrix"] {
+    --bg: #0d0f0d; --bg-alt: #0a0c0a; --main: #00e676; --caret: #00e676;
+    --text: #9bd9a8; --sub: #3c5a42; --correct: #c8f5d2; --error: #ff5252; --error-extra: #5a1f1f; --line: #2c4030;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    transition: background .3s, color .3s;
+    overflow-x: hidden;
+    display: flex; flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ============ HEADER ============ */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; gap: 16px; flex-wrap: wrap;
+  }
+  .logo { font-size: 26px; font-weight: 700; color: var(--main); letter-spacing: -1px; cursor: pointer; user-select: none; }
+  .logo span { color: var(--sub); }
+  .icon-btn {
+    background: none; border: none; color: var(--sub); cursor: pointer;
+    font-size: 20px; padding: 6px 10px; border-radius: 8px; transition: color .2s, background .2s;
+  }
+  .icon-btn:hover { color: var(--text); background: var(--bg-alt); }
+
+  /* ============ BARRA DE CONFIG DE TEST ============ */
+  .config-bar {
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 6px;
+    background: var(--bg-alt); border-radius: 10px; padding: 8px 14px;
+    margin: 0 auto; width: fit-content; max-width: 95%; font-size: 13px;
+    align-items: center;
+  }
+  .config-group { display: flex; align-items: center; gap: 2px; padding: 0 8px; }
+  .config-group + .config-group { border-left: 2px solid var(--bg); }
+  .config-btn {
+    background: none; border: none; color: var(--sub); cursor: pointer;
+    padding: 4px 9px; border-radius: 6px; font-family: inherit; font-size: 13px;
+    transition: color .15s; display: flex; align-items: center; gap: 4px;
+  }
+  .config-btn:hover { color: var(--text); }
+  .config-btn.active { color: var(--main); }
+
+  /* ============ ÁREA PRINCIPAL ============ */
+  main {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 20px; gap: 28px; position: relative;
+  }
+
+  /* stats en vivo */
+  .live-stats {
+    display: flex; gap: 36px; color: var(--main); font-size: 22px;
+    opacity: 0; transition: opacity .2s; min-height: 28px;
+  }
+  .live-stats.show { opacity: 1; }
+  .live-stats .stat small { display:block; font-size: 12px; color: var(--sub); }
+
+  /* contenedor del texto */
+  #typeWrap {
+    width: 100%; max-width: 1100px; position: relative;
+  }
+  #typeArea {
+    position: relative; line-height: 1.6; font-size: var(--font-size);
+    color: var(--sub); outline: none; user-select: none;
+    max-height: calc(var(--font-size) * 1.6 * 3); overflow: hidden;
+  }
+  /* modo "texto se mueve": una sola línea que se desplaza */
+  #typeArea.smooth-scroll {
+    white-space: nowrap; max-height: calc(var(--font-size) * 1.6);
+    overflow: hidden;
+  }
+  #typeArea .word { display: inline-block; margin: 0 .3em; }
+  #typeArea.smooth-scroll #words { display: inline-block; transition: transform .12s linear; }
+  #typeArea:not(.smooth-scroll) #words { display: block; }
+  .letter { position: relative; }
+  .letter.correct { color: var(--correct); }
+  .letter.incorrect { color: var(--error); }
+  .letter.extra { color: var(--error-extra); }
+  .word.error-word { text-decoration: underline; text-decoration-color: var(--error); text-underline-offset: 4px; }
+
+  /* caret */
+  #caret {
+    position: absolute; background: var(--caret); border-radius: 2px;
+    width: 3px; height: calc(var(--font-size) * 1.05); top: 0; left: 0;
+    transition: none;
+  }
+  #caret.smooth { transition: left .1s ease, top .1s ease; }
+  #caret.block { width: calc(var(--font-size) * .58); opacity: .55; }
+  #caret.underline { height: 3px; top: calc(var(--font-size) * 1.05); width: calc(var(--font-size) * .58); }
+  #caret.blink { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* input oculto que captura el tipeo */
+  #hiddenInput {
+    position: absolute; opacity: 0; pointer-events: none; left: -9999px;
+  }
+
+  /* mensaje "click para enfocar" */
+  .focus-warn {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    color: var(--text); font-size: 16px; cursor: pointer; backdrop-filter: blur(3px);
+    z-index: 5;
+  }
+  #typeWrap.unfocused .focus-warn { display: flex; }
+  #typeWrap.unfocused #typeArea { filter: blur(4px); opacity: .5; }
+
+  .restart-row { display: flex; gap: 14px; align-items: center; }
+  .restart-btn {
+    background: none; border: none; color: var(--sub); cursor: pointer;
+    font-size: 18px; padding: 8px 16px; border-radius: 8px; transition: color .2s, background .2s;
+  }
+  .restart-btn:hover { color: var(--text); background: var(--bg-alt); }
+  .hint { color: var(--sub); font-size: 12px; }
+  .hint kbd {
+    background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; color: var(--text); font-size: 11px;
+  }
+
+  /* ============ RESULTADOS ============ */
+  #results { display: none; width: 100%; max-width: 1000px; }
+  #results.show { display: block; }
+  .res-top { display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
+  .res-main { display: flex; flex-direction: column; gap: 18px; }
+  .res-big { font-size: 14px; color: var(--sub); }
+  .res-big b { display: block; font-size: 56px; color: var(--main); font-weight: 600; line-height: 1; }
+  .res-chart-wrap { flex: 1; min-width: 280px; }
+  .res-grid { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 8px; }
+  .res-item { color: var(--sub); font-size: 13px; }
+  .res-item b { display: block; font-size: 28px; color: var(--text); font-weight: 500; }
+
+  /* ============ HISTORIAL ============ */
+  .history-sec { width: 100%; max-width: 1000px; margin: 10px auto 40px; padding: 0 20px; }
+  .history-sec h2 { color: var(--sub); font-size: 15px; font-weight: 500; margin-bottom: 12px; display:flex; justify-content: space-between; align-items: center;}
+  .history-sec h2 button {
+    background: none; border: 1px solid var(--line); color: var(--sub); cursor: pointer;
+    font-size: 11px; padding: 4px 10px; border-radius: 6px; font-family: inherit; transition: .2s;
+  }
+  .history-sec h2 button:hover { color: var(--error); border-color: var(--error); }
+  #histChartWrap { background: var(--bg-alt); border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+  canvas { width: 100%; max-width: 100%; display: block; }
+  #runChart { height: 160px; }
+  #histChart { height: 180px; }
+  table.hist { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.hist th { color: var(--sub); text-align: left; font-weight: 500; padding: 8px 10px; border-bottom: 2px solid var(--bg-alt); }
+  table.hist td { padding: 8px 10px; border-bottom: 1px solid var(--bg-alt); color: var(--text); }
+  table.hist tr:hover td { background: var(--bg-alt); }
+  .empty-hist { color: var(--sub); font-size: 13px; padding: 14px; text-align: center; }
+
+  /* ============ MODAL SETTINGS ============ */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none;
+    z-index: 50; backdrop-filter: blur(2px);
+  }
+  .overlay.show { display: block; }
+  .panel {
+    position: fixed; top: 0; right: 0; height: 100%; width: 420px; max-width: 92vw;
+    background: var(--bg-alt); z-index: 51; transform: translateX(100%);
+    transition: transform .3s ease; overflow-y: auto; padding: 24px;
+    box-shadow: -8px 0 30px rgba(0,0,0,.3);
+  }
+  .panel.show { transform: translateX(0); }
+  .panel h2 { font-size: 20px; color: var(--text); margin-bottom: 20px; display: flex; justify-content: space-between; }
+  .panel h2 .icon-btn { font-size: 22px; }
+  .setting { margin-bottom: 22px; }
+  .setting label { display: block; color: var(--sub); font-size: 13px; margin-bottom: 8px; }
+  .opt-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opt {
+    background: var(--bg); border: none; color: var(--sub); cursor: pointer;
+    padding: 7px 12px; border-radius: 7px; font-family: inherit; font-size: 13px; transition: .15s;
+  }
+  .opt:hover { color: var(--text); }
+  .opt.active { background: var(--main); color: var(--bg); }
+  input[type=range] { width: 100%; accent-color: var(--main); }
+  .range-val { color: var(--main); font-size: 13px; float: right; }
+  textarea#customText {
+    width: 100%; min-height: 90px; background: var(--bg); border: 1px solid var(--line);
+    color: var(--text); border-radius: 8px; padding: 10px; font-family: inherit; font-size: 13px; resize: vertical;
+  }
+
+  /* aviso de almacenamiento */
+  .storage-warn {
+    display: none; background: var(--error-extra); color: var(--text);
+    font-size: 12px; padding: 6px 14px; border-radius: 8px; margin: 0 auto;
+    width: fit-content; max-width: 90%; text-align: center;
+  }
+  .storage-warn.show { display: block; }
+
+  footer { text-align: center; color: var(--sub); font-size: 12px; padding: 16px; }
+
+  @media (max-width: 600px) {
+    :root { --font-size: 22px; }
+    .live-stats { gap: 20px; font-size: 18px; }
+    header { padding: 14px; }
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <div class="logo" id="logoHome">type<span>trainer</span></div>
+  <button class="icon-btn" id="openSettings" title="Ajustes">⚙</button>
+</header>
+
+<div class="storage-warn" id="storageWarn">⚠ Guardado permanente no disponible (estás abriendo el archivo localmente). Las runs se guardan solo en esta sesión.</div>
+
+<div class="config-bar" id="configBar">
+  <div class="config-group" id="grpType">
+    <button class="config-btn" data-mode="time">⏱ tiempo</button>
+    <button class="config-btn" data-mode="words">A palabras</button>
+    <button class="config-btn" data-mode="custom">✎ propio</button>
+  </div>
+  <div class="config-group" id="grpAmount"></div>
+  <div class="config-group" id="grpLang">
+    <button class="config-btn" data-lang="es">español</button>
+    <button class="config-btn" data-lang="en">inglés</button>
+    <button class="config-btn" data-lang="mix">mezcla</button>
+  </div>
+</div>
+
+<main>
+  <div class="live-stats" id="liveStats">
+    <div class="stat" id="liveMain">0<small>wpm</small></div>
+    <div class="stat" id="liveTime">0<small>tiempo</small></div>
+    <div class="stat" id="liveAcc">100%<small>precisión</small></div>
+  </div>
+
+  <div id="typeWrap">
+    <div class="focus-warn" id="focusWarn">Click acá o presioná cualquier tecla para enfocar</div>
+    <div id="typeArea" tabindex="0">
+      <div id="words"></div>
+      <div id="caret"></div>
+    </div>
+    <input id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  </div>
+
+  <div class="restart-row" id="restartRow">
+    <button class="restart-btn" id="restartBtn" title="Reiniciar (Tab)">↻ reiniciar</button>
+    <span class="hint"><kbd>Tab</kbd> reiniciar · <kbd>Esc</kbd> también</span>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div id="results">
+    <div class="res-top">
+      <div class="res-main">
+        <div class="res-big"><b id="rWpm">0</b>wpm</div>
+        <div class="res-big"><b id="rAcc">0%</b>precisión</div>
+      </div>
+      <div class="res-chart-wrap">
+        <canvas id="runChart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="res-grid">
+      <div class="res-item"><b id="rRaw">0</b>raw wpm</div>
+      <div class="res-item"><b id="rConsist">0%</b>consistencia</div>
+      <div class="res-item"><b id="rTime">0s</b>tiempo</div>
+      <div class="res-item"><b id="rErrors">0</b>errores</div>
+      <div class="res-item"><b id="rChars">0</b>caracteres</div>
+    </div>
+  </div>
+</main>
+
+<!-- HISTORIAL -->
+<div class="history-sec">
+  <h2>Historial <button id="clearHist">borrar historial</button></h2>
+  <div id="histChartWrap"><canvas id="histChart" height="180"></canvas></div>
+  <table class="hist">
+    <thead><tr><th>Fecha</th><th>WPM</th><th>Precisión</th><th>Modo</th><th>Consist.</th></tr></thead>
+    <tbody id="histBody"></tbody>
+  </table>
+  <div class="empty-hist" id="emptyHist">Todavía no hay runs guardadas. ¡Hacé tu primer test!</div>
+</div>
+
+<footer>Hecho con HTML, CSS y JS puro · <kbd>Tab</kbd> para reiniciar rápido</footer>
+
+<!-- PANEL DE AJUSTES -->
+<div class="overlay" id="overlay"></div>
+<aside class="panel" id="panel">
+  <h2>Ajustes <button class="icon-btn" id="closeSettings">✕</button></h2>
+
+  <div class="setting">
+    <label>Tema</label>
+    <div class="opt-row" id="themeOpts">
+      <button class="opt" data-theme="dark">Oscuro</button>
+      <button class="opt" data-theme="light">Claro</button>
+      <button class="opt" data-theme="ocean">Ocean</button>
+      <button class="opt" data-theme="rose">Rosa</button>
+      <button class="opt" data-theme="matrix">Matrix</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Fuente</label>
+    <div class="opt-row" id="fontOpts">
+      <button class="opt" data-font="'Roboto Mono', monospace">Roboto Mono</button>
+      <button class="opt" data-font="'JetBrains Mono', 'Courier New', monospace">JetBrains Mono</button>
+      <button class="opt" data-font="monospace">Monoespaciada</button>
+      <button class="opt" data-font="-apple-system, Segoe UI, Roboto, sans-serif">Sans-serif</button>
+      <button class="opt" data-font="Georgia, 'Times New Roman', serif">Serif</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Tamaño de fuente <span class="range-val" id="fontSizeVal">28px</span></label>
+    <input type="range" id="fontSizeRange" min="18" max="48" step="2" value="28">
+  </div>
+
+  <div class="setting">
+    <label>Movimiento del texto</label>
+    <div class="opt-row" id="moveOpts">
+      <button class="opt" data-move="caret">Caret se mueve</button>
+      <button class="opt" data-move="text">Texto se mueve</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Estilo de caret</label>
+    <div class="opt-row" id="caretOpts">
+      <button class="opt" data-caret="line">Línea</button>
+      <button class="opt" data-caret="block">Bloque</button>
+      <button class="opt" data-caret="underline">Subrayado</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Animación del caret</label>
+    <div class="opt-row" id="caretAnimOpts">
+      <button class="opt" data-anim="smooth">Suave</button>
+      <button class="opt" data-anim="instant">Instantáneo</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Sonido de tecla</label>
+    <div class="opt-row" id="soundOpts">
+      <button class="opt" data-sound="on">Activado</button>
+      <button class="opt" data-sound="off">Desactivado</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Texto propio (para el modo ✎ propio)</label>
+    <textarea id="customText" placeholder="Pegá acá tu texto y elegí el modo 'propio' arriba..."></textarea>
+  </div>
+</aside>
+
+<script>
+"use strict";
+/* =========================================================
+   ALMACENAMIENTO con fallback a memoria
+   ========================================================= */
+const Store = (() => {
+  let ok = true;
+  const mem = {};
+  try {
+    const k = '__tt_test__';
+    localStorage.setItem(k, '1'); localStorage.removeItem(k);
+  } catch (e) { ok = false; }
+  return {
+    available: ok,
+    get(key, def) {
+      try {
+        const v = ok ? localStorage.getItem(key) : mem[key];
+        return v == null ? def : JSON.parse(v);
+      } catch (e) { return def; }
+    },
+    set(key, val) {
+      try {
+        const s = JSON.stringify(val);
+        if (ok) localStorage.setItem(key, s); else mem[key] = s;
+      } catch (e) { mem[key] = JSON.stringify(val); }
+    },
+    del(key) { try { ok ? localStorage.removeItem(key) : delete mem[key]; } catch(e){} }
+  };
+})();
+if (!Store.available) document.getElementById('storageWarn').classList.add('show');
+
+/* =========================================================
+   LISTAS DE PALABRAS
+   ========================================================= */
+const WORDS = {
+  es: "el la de que y a en un ser se no haber por con su para como estar tener le lo todo pero más hacer o poder decir este ir otro ese si me ya ver porque dar cuando él muy sin vez mucho saber qué sobre mi alguno mismo yo también hasta año dos querer entre así primero desde grande eso ni nos llegar pasar tiempo ella sí día uno bien poco deber entonces poner cosa tanto hombre parecer nuestro tan donde ahora parte después vida quedar siempre creer hablar llevar dejar nada cada seguir menos nuevo encontrar algo solo casa mundo agua noche cielo fuego viento camino puerta luz sombra fuerza palabra".split(" "),
+  en: "the be to of and a in that have i it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us".split(" ")
+};
+
+/* =========================================================
+   ESTADO Y SETTINGS
+   ========================================================= */
+const DEFAULTS = {
+  theme: 'dark',
+  font: "'Roboto Mono', monospace",
+  fontSize: 28,
+  move: 'caret',
+  caret: 'line',
+  anim: 'smooth',
+  sound: 'off',
+  testType: 'time',   // time | words | custom
+  amount: 30,         // segundos o palabras
+  lang: 'es',
+  customText: ''
+};
+let S = Object.assign({}, DEFAULTS, Store.get('tt_settings', {}));
+
+const AMOUNTS = { time: [15, 30, 60], words: [10, 25, 50] };
+
+/* =========================================================
+   ELEMENTOS
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const wordsEl = $('words'), caretEl = $('caret'), typeArea = $('typeArea'),
+      typeWrap = $('typeWrap'), hidden = $('hiddenInput'), liveStats = $('liveStats');
+
+/* =========================================================
+   MOTOR DEL TEST
+   ========================================================= */
+let state = null;
+
+function genWords(n) {
+  if (S.testType === 'custom') {
+    const t = (S.customText || '').trim();
+    if (t) return t.split(/\s+/);
+    return WORDS.es.slice(0, 25);
+  }
+  let pool;
+  if (S.lang === 'es') pool = WORDS.es;
+  else if (S.lang === 'en') pool = WORDS.en;
+  else pool = WORDS.es.concat(WORDS.en);
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(pool[Math.floor(Math.random() * pool.length)]);
+  return out;
+}
+
+function newTest() {
+  let list;
+  if (S.testType === 'words') list = genWords(S.amount);
+  else if (S.testType === 'custom') list = genWords(0);
+  else list = genWords(60); // tiempo: pool grande, se regenera si hace falta
+
+  state = {
+    words: list,
+    typed: [],          // array de strings tipeados por palabra
+    wi: 0,              // índice de palabra
+    started: false,
+    startTime: 0,
+    finished: false,
+    timer: null,
+    timeLeft: S.testType === 'time' ? S.amount : null,
+    wpmSeries: [],      // [{t, wpm, raw, errors}]
+    sampleTimer: null,
+    correctChars: 0,
+    incorrectChars: 0,
+    totalKeys: 0,
+    lastErrorsSnapshot: 0
+  };
+  state.typed = [''];
+
+  $('results').classList.remove('show');
+  typeWrap.style.display = 'block';
+  $('restartRow').style.display = 'flex';
+  liveStats.classList.remove('show');
+  renderWords();
+  updateLiveStats(0, 0, 100);
+  $('liveTime').innerHTML = (S.testType === 'time' ? S.amount : 0) + '<small>tiempo</small>';
+  requestAnimationFrame(positionCaret);
+  focusInput();
+}
+
+function renderWords() {
+  let html = '';
+  state.words.forEach((w, i) => {
+    html += `<span class="word" data-w="${i}">`;
+    for (const ch of w) html += `<span class="letter">${ch}</span>`;
+    html += `</span>`;
+  });
+  wordsEl.innerHTML = html;
+  wordsEl.style.transform = 'translateX(0)';
+  paintAll();
+}
+
+/* repinta el estado de la palabra actual y previas */
+function paintWord(i) {
+  const wordEl = wordsEl.children[i];
+  if (!wordEl) return;
+  const target = state.words[i];
+  const typed = state.typed[i] || '';
+  const letters = wordEl.querySelectorAll('.letter');
+  // limpiar extras anteriores
+  wordEl.querySelectorAll('.letter.extra').forEach(e => e.remove());
+  letters.forEach((le, j) => {
+    if (le.classList.contains('extra')) return;
+    le.classList.remove('correct', 'incorrect');
+    if (j < typed.length) {
+      le.classList.add(typed[j] === target[j] ? 'correct' : 'incorrect');
+    }
+  });
+  // caracteres extra (más largos que la palabra)
+  if (typed.length > target.length) {
+    for (let j = target.length; j < typed.length; j++) {
+      const ex = document.createElement('span');
+      ex.className = 'letter incorrect extra';
+      ex.textContent = typed[j];
+      wordEl.appendChild(ex);
+    }
+  }
+  // marcar palabra con error si ya pasó y quedó mal
+  if (i < state.wi) {
+    wordEl.classList.toggle('error-word', typed !== target);
+  } else {
+    wordEl.classList.remove('error-word');
+  }
+}
+function paintAll() { state.words.forEach((_, i) => paintWord(i)); }
+
+/* =========================================================
+   CARET
+   ========================================================= */
+function positionCaret() {
+  if (!state) return;
+  const wi = state.wi;
+  const wordEl = wordsEl.children[wi];
+  if (!wordEl) return;
+  const typed = state.typed[wi] || '';
+  const letters = wordEl.querySelectorAll('.letter');
+  let rect, left, top;
+  const areaRect = typeArea.getBoundingClientRect();
+
+  if (typed.length === 0) {
+    if (letters[0]) {
+      rect = letters[0].getBoundingClientRect();
+      left = rect.left - areaRect.left; top = rect.top - areaRect.top;
+    } else { left = 0; top = 0; }
+  } else {
+    const idx = Math.min(typed.length, letters.length) - 1;
+    const le = letters[Math.min(typed.length - 1, letters.length - 1)];
+    if (typed.length >= letters.length) {
+      rect = letters[letters.length - 1].getBoundingClientRect();
+      left = rect.right - areaRect.left;
+    } else {
+      rect = letters[typed.length].getBoundingClientRect();
+      left = rect.left - areaRect.left;
+    }
+    top = rect.top - areaRect.top;
+  }
+
+  // modo "texto se mueve": desplazar #words para mantener caret centrado
+  if (S.move === 'text') {
+    const centerX = typeArea.clientWidth / 2;
+    const shift = Math.max(0, left - centerX);
+    wordsEl.style.transform = `translateX(${-shift}px)`;
+    caretEl.style.left = (left - shift) + 'px';
+    caretEl.style.top = top + 'px';
+  } else {
+    wordsEl.style.transform = 'translateX(0)';
+    caretEl.style.left = left + 'px';
+    caretEl.style.top = top + 'px';
+    // scroll vertical suave entre líneas (modo caret)
+    scrollToLine(top);
+  }
+}
+
+function scrollToLine(top) {
+  const lineH = parseFloat(getComputedStyle(typeArea).fontSize) * 1.6;
+  // mantener el caret en las primeras 2 líneas visibles
+  const offset = Math.max(0, Math.floor(top / lineH) - 1) * lineH;
+  wordsEl.style.transform = `translateY(${-offset}px)`;
+  caretEl.style.transform = `translateY(${-offset}px)`;
+}
+
+/* =========================================================
+   ENTRADA DE TECLADO
+   ========================================================= */
+function onInput(key) {
+  if (state.finished) return;
+  if (!state.started) startTest();
+
+  state.totalKeys++;
+  const target = state.words[state.wi];
+
+  if (key === ' ') {
+    if ((state.typed[state.wi] || '').length === 0) return; // ignorar espacio al inicio
+    // avanzar de palabra
+    paintWord(state.wi);
+    state.wi++;
+    if (!state.typed[state.wi]) state.typed[state.wi] = '';
+    // en modo tiempo, generar más palabras si se acaban
+    if (S.testType === 'time' && state.wi >= state.words.length - 5) {
+      state.words = state.words.concat(genWords(30));
+      appendWordsDOM();
+    }
+    if (S.testType !== 'time' && state.wi >= state.words.length) {
+      finishTest();
+      return;
+    }
+  } else if (key === 'Backspace') {
+    let t = state.typed[state.wi] || '';
+    if (t.length > 0) {
+      state.typed[state.wi] = t.slice(0, -1);
+    } else if (state.wi > 0) {
+      state.wi--;
+    }
+    paintWord(state.wi);
+  } else if (key.length === 1) {
+    const t = state.typed[state.wi] || '';
+    if (t.length >= target.length + 10) return; // límite de extras
+    state.typed[state.wi] = t + key;
+    // contabilizar correcto/incorrecto
+    const pos = t.length;
+    if (key === target[pos]) state.correctChars++;
+    else state.incorrectChars++;
+    paintWord(state.wi);
+    playSound();
+  }
+  positionCaret();
+  liveUpdate();
+}
+
+function appendWordsDOM() {
+  let html = '';
+  for (let i = wordsEl.children.length; i < state.words.length; i++) {
+    const w = state.words[i];
+    html += `<span class="word" data-w="${i}">`;
+    for (const ch of w) html += `<span class="letter">${ch}</span>`;
+    html += `</span>`;
+  }
+  wordsEl.insertAdjacentHTML('beforeend', html);
+}
+
+/* =========================================================
+   TIMING / STATS EN VIVO
+   ========================================================= */
+function startTest() {
+  state.started = true;
+  state.startTime = performance.now();
+  liveStats.classList.add('show');
+
+  // muestreo por segundo para el gráfico y consistencia
+  state.sampleTimer = setInterval(() => {
+    if (state.finished) return;
+    const elapsed = (performance.now() - state.startTime) / 1000;
+    const { wpm, raw } = calcWpm(elapsed);
+    const errNow = state.incorrectChars;
+    state.wpmSeries.push({ t: Math.round(elapsed), wpm, raw, errors: errNow - state.lastErrorsSnapshot });
+    state.lastErrorsSnapshot = errNow;
+  }, 1000);
+
+  if (S.testType === 'time') {
+    state.timer = setInterval(() => {
+      state.timeLeft--;
+      $('liveTime').innerHTML = state.timeLeft + '<small>tiempo</small>';
+      if (state.timeLeft <= 0) finishTest();
+    }, 1000);
+  }
+}
+
+function calcWpm(elapsedSec) {
+  if (elapsedSec <= 0) return { wpm: 0, raw: 0 };
+  const correct = state.correctChars;
+  const total = state.correctChars + state.incorrectChars;
+  const wpm = Math.round((correct / 5) / (elapsedSec / 60));
+  const raw = Math.round((total / 5) / (elapsedSec / 60));
+  return { wpm: Math.max(0, wpm), raw: Math.max(0, raw) };
+}
+
+function accuracy() {
+  const total = state.correctChars + state.incorrectChars;
+  if (total === 0) return 100;
+  return Math.round((state.correctChars / total) * 100);
+}
+
+function liveUpdate() {
+  if (!state.started) return;
+  const elapsed = (performance.now() - state.startTime) / 1000;
+  const { wpm } = calcWpm(elapsed);
+  updateLiveStats(wpm, Math.round(elapsed), accuracy());
+  if (S.testType !== 'time') $('liveTime').innerHTML = Math.round(elapsed) + '<small>tiempo</small>';
+}
+function updateLiveStats(wpm, time, acc) {
+  $('liveMain').innerHTML = wpm + '<small>wpm</small>';
+  $('liveAcc').innerHTML = acc + '%<small>precisión</small>';
+}
+
+/* =========================================================
+   FIN DEL TEST + RESULTADOS
+   ========================================================= */
+function finishTest() {
+  if (state.finished) return;
+  state.finished = true;
+  clearInterval(state.timer);
+  clearInterval(state.sampleTimer);
+
+  const elapsed = Math.max(0.5, (performance.now() - state.startTime) / 1000);
+  const { wpm, raw } = calcWpm(elapsed);
+  const acc = accuracy();
+  const consist = consistency();
+  const errors = state.incorrectChars;
+  const chars = state.correctChars + state.incorrectChars;
+
+  // pantalla de resultados
+  $('rWpm').textContent = wpm;
+  $('rAcc').textContent = acc + '%';
+  $('rRaw').textContent = raw;
+  $('rConsist').textContent = consist + '%';
+  $('rTime').textContent = Math.round(elapsed) + 's';
+  $('rErrors').textContent = errors;
+  $('rChars').textContent = chars;
+
+  liveStats.classList.remove('show');
+  typeWrap.style.display = 'none';
+  $('results').classList.add('show');
+  drawRunChart();
+
+  // guardar run
+  const modeLabel = S.testType === 'time' ? `tiempo ${S.amount}s`
+                  : S.testType === 'words' ? `${S.amount} palabras`
+                  : 'texto propio';
+  const run = {
+    date: Date.now(), wpm, raw, acc, consist, errors, time: Math.round(elapsed),
+    mode: modeLabel, lang: S.lang
+  };
+  saveRun(run);
+  renderHistory();
+}
+
+/* consistencia = 100 - coef. de variación de la serie de wpm (en %) */
+function consistency() {
+  const arr = state.wpmSeries.map(s => s.raw).filter(v => v > 0);
+  if (arr.length < 2) return 100;
+  const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+  if (mean === 0) return 0;
+  const variance = arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length;
+  const cv = Math.sqrt(variance) / mean;
+  return Math.max(0, Math.min(100, Math.round((1 - cv) * 100)));
+}
+
+/* =========================================================
+   GRÁFICO DE LA RUN (canvas)
+   ========================================================= */
+function drawRunChart() {
+  const canvas = $('runChart');
+  const data = state.wpmSeries;
+  drawLineChart(canvas, data.map(d => d.wpm), data.map(d => d.raw), data.map(d => d.t + 's'));
+}
+
+function drawLineChart(canvas, wpmArr, rawArr, labels) {
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 600;
+  const cssH = canvas.clientHeight || 160;
+  canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const css = getComputedStyle(document.body);
+  const main = css.getPropertyValue('--main').trim();
+  const sub = css.getPropertyValue('--sub').trim();
+  const errCol = css.getPropertyValue('--error').trim();
+
+  const pad = { l: 34, r: 12, t: 14, b: 22 };
+  const W = cssW - pad.l - pad.r, H = cssH - pad.t - pad.b;
+  if (!wpmArr.length) {
+    ctx.fillStyle = sub; ctx.font = '12px monospace';
+    ctx.fillText('sin datos suficientes', pad.l, cssH / 2); return;
+  }
+  const maxV = Math.max(10, ...wpmArr, ...rawArr) * 1.15;
+
+  // grilla horizontal
+  ctx.strokeStyle = sub; ctx.globalAlpha = .2; ctx.lineWidth = 1;
+  ctx.fillStyle = sub; ctx.font = '10px monospace'; ctx.globalAlpha = 1;
+  for (let g = 0; g <= 4; g++) {
+    const y = pad.t + H - (H * g / 4);
+    ctx.globalAlpha = .15; ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + W, y); ctx.stroke();
+    ctx.globalAlpha = .6; ctx.fillText(Math.round(maxV * g / 4), 4, y + 3);
+  }
+  ctx.globalAlpha = 1;
+
+  const X = i => pad.l + (wpmArr.length === 1 ? W / 2 : W * i / (wpmArr.length - 1));
+  const Y = v => pad.t + H - (H * v / maxV);
+
+  // línea raw (tenue)
+  ctx.strokeStyle = sub; ctx.lineWidth = 1.5; ctx.globalAlpha = .5;
+  ctx.beginPath();
+  rawArr.forEach((v, i) => i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)));
+  ctx.stroke(); ctx.globalAlpha = 1;
+
+  // línea wpm (principal)
+  ctx.strokeStyle = main; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  wpmArr.forEach((v, i) => i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)));
+  ctx.stroke();
+  // puntos
+  ctx.fillStyle = main;
+  wpmArr.forEach((v, i) => { ctx.beginPath(); ctx.arc(X(i), Y(v), 2.5, 0, 7); ctx.fill(); });
+
+  // etiquetas X (algunas)
+  ctx.fillStyle = sub; ctx.font = '9px monospace';
+  const step = Math.ceil(labels.length / 8);
+  labels.forEach((l, i) => { if (i % step === 0) ctx.fillText(l, X(i) - 6, cssH - 6); });
+}
+
+/* =========================================================
+   HISTORIAL
+   ========================================================= */
+function getHistory() { return Store.get('tt_history', []); }
+function saveRun(run) {
+  const h = getHistory();
+  h.push(run);
+  if (h.length > 200) h.shift();
+  Store.set('tt_history', h);
+}
+function renderHistory() {
+  const h = getHistory();
+  const body = $('histBody');
+  const empty = $('emptyHist');
+  body.innerHTML = '';
+  if (!h.length) { empty.style.display = 'block'; drawHistChart([]); return; }
+  empty.style.display = 'none';
+  // últimas primero
+  h.slice().reverse().slice(0, 30).forEach(r => {
+    const d = new Date(r.date);
+    const fecha = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${fecha}</td><td style="color:var(--main)">${r.wpm}</td><td>${r.acc}%</td><td>${r.mode}</td><td>${r.consist != null ? r.consist + '%' : '—'}</td>`;
+    body.appendChild(tr);
+  });
+  drawHistChart(h);
+}
+function drawHistChart(h) {
+  const canvas = $('histChart');
+  if (!h.length) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.clientWidth;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+  const recent = h.slice(-40);
+  const wpm = recent.map(r => r.wpm);
+  const labels = recent.map((r,i) => '');
+  drawLineChart(canvas, wpm, wpm.map(()=>0), labels.map((_,i)=> (i % 5===0? '#'+(h.length-recent.length+i+1):'') ));
+}
+
+/* =========================================================
+   SONIDO
+   ========================================================= */
+let audioCtx = null;
+function playSound() {
+  if (S.sound !== 'on') return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = 440 + Math.random() * 120;
+    g.gain.value = 0.04;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.06);
+    o.stop(audioCtx.currentTime + 0.07);
+  } catch (e) {}
+}
+
+/* =========================================================
+   FOCO
+   ========================================================= */
+function focusInput() { hidden.focus({ preventScroll: true }); typeWrap.classList.remove('unfocused'); }
+hidden.addEventListener('blur', () => { if (state && state.started && !state.finished) typeWrap.classList.add('unfocused'); });
+hidden.addEventListener('focus', () => typeWrap.classList.remove('unfocused'));
+typeWrap.addEventListener('click', focusInput);
+$('focusWarn').addEventListener('click', focusInput);
+
+/* capturar tecleo desde el input oculto */
+hidden.addEventListener('keydown', (e) => {
+  // atajos
+  if (e.key === 'Tab') { e.preventDefault(); newTest(); return; }
+  if (e.key === 'Escape') { e.preventDefault(); newTest(); return; }
+  if (e.key === 'Backspace') { e.preventDefault(); onInput('Backspace'); return; }
+  if (e.key === ' ') { e.preventDefault(); onInput(' '); return; }
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault(); onInput(e.key);
+  }
+});
+
+/* foco global: cualquier tecla (fuera de modal/inputs) enfoca y tipea */
+document.addEventListener('keydown', (e) => {
+  if ($('panel').classList.contains('show')) return;
+  if (document.activeElement === hidden) return;
+  if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.key === 'Tab' || e.key === 'Escape') { e.preventDefault(); newTest(); return; }
+  if (e.key.length === 1) focusInput();
+});
+
+/* =========================================================
+   APLICAR SETTINGS A LA UI
+   ========================================================= */
+function applySettings() {
+  document.body.setAttribute('data-theme', S.theme);
+  document.documentElement.style.setProperty('--font', S.font);
+  document.documentElement.style.setProperty('--font-size', S.fontSize + 'px');
+  $('fontSizeVal').textContent = S.fontSize + 'px';
+  $('fontSizeRange').value = S.fontSize;
+
+  // caret clases
+  caretEl.className = '';
+  caretEl.classList.add(S.caret);
+  if (S.anim === 'smooth') caretEl.classList.add('smooth');
+  caretEl.classList.add('blink');
+
+  // modo de movimiento
+  typeArea.classList.toggle('smooth-scroll', S.move === 'text');
+
+  // marcar botones activos
+  markActive('themeOpts', 'theme', S.theme);
+  markActive('fontOpts', 'font', S.font);
+  markActive('moveOpts', 'move', S.move);
+  markActive('caretOpts', 'caret', S.caret);
+  markActive('caretAnimOpts', 'anim', S.anim);
+  markActive('soundOpts', 'sound', S.sound);
+
+  // barra de config
+  markConfig();
+  $('customText').value = S.customText || '';
+
+  if (state) { positionCaret(); }
+}
+function markActive(containerId, attr, val) {
+  $(containerId).querySelectorAll('.opt').forEach(b =>
+    b.classList.toggle('active', b.dataset[attr] === val));
+}
+function saveSettings() { Store.set('tt_settings', S); }
+
+/* barra de config (tipo de test, cantidad, idioma) */
+function markConfig() {
+  $('grpType').querySelectorAll('.config-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === S.testType));
+  // cantidades
+  const amtWrap = $('grpAmount');
+  if (S.testType === 'custom') { amtWrap.style.display = 'none'; }
+  else {
+    amtWrap.style.display = 'flex';
+    amtWrap.innerHTML = '';
+    AMOUNTS[S.testType].forEach(a => {
+      const b = document.createElement('button');
+      b.className = 'config-btn' + (a === S.amount ? ' active' : '');
+      b.textContent = a + (S.testType === 'time' ? 's' : '');
+      b.onclick = () => { S.amount = a; saveSettings(); markConfig(); newTest(); };
+      amtWrap.appendChild(b);
+    });
+  }
+  // idioma solo si no es custom
+  $('grpLang').style.display = S.testType === 'custom' ? 'none' : 'flex';
+  $('grpLang').querySelectorAll('.config-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === S.lang));
+}
+
+/* =========================================================
+   LISTENERS DE LA UI
+   ========================================================= */
+// barra: tipo de test
+$('grpType').querySelectorAll('.config-btn').forEach(b => {
+  b.onclick = () => {
+    S.testType = b.dataset.mode;
+    if (S.testType !== 'custom' && !AMOUNTS[S.testType].includes(S.amount))
+      S.amount = AMOUNTS[S.testType][1];
+    saveSettings(); markConfig(); newTest();
+  };
+});
+// barra: idioma
+$('grpLang').querySelectorAll('.config-btn').forEach(b => {
+  b.onclick = () => { S.lang = b.dataset.lang; saveSettings(); markConfig(); newTest(); };
+});
+
+// panel settings
+$('openSettings').onclick = () => { $('overlay').classList.add('show'); $('panel').classList.add('show'); };
+function closePanel() { $('overlay').classList.remove('show'); $('panel').classList.remove('show'); focusInput(); }
+$('closeSettings').onclick = closePanel;
+$('overlay').onclick = closePanel;
+
+$('themeOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.theme = b.dataset.theme; applySettings(); saveSettings(); drawHistChart(getHistory()); });
+$('fontOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.font = b.dataset.font; applySettings(); saveSettings(); requestAnimationFrame(positionCaret); });
+$('moveOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.move = b.dataset.move; applySettings(); saveSettings(); newTest(); });
+$('caretOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.caret = b.dataset.caret; applySettings(); saveSettings(); requestAnimationFrame(positionCaret); });
+$('caretAnimOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.anim = b.dataset.anim; applySettings(); saveSettings(); });
+$('soundOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.sound = b.dataset.sound; applySettings(); saveSettings(); });
+
+$('fontSizeRange').oninput = (e) => {
+  S.fontSize = +e.target.value; $('fontSizeVal').textContent = S.fontSize + 'px';
+  document.documentElement.style.setProperty('--font-size', S.fontSize + 'px');
+  requestAnimationFrame(positionCaret);
+};
+$('fontSizeRange').onchange = () => saveSettings();
+
+$('customText').addEventListener('input', (e) => { S.customText = e.target.value; saveSettings(); });
+
+$('restartBtn').onclick = newTest;
+$('logoHome').onclick = newTest;
+$('clearHist').onclick = () => {
+  if (confirm('¿Borrar todo el historial de runs?')) { Store.del('tt_history'); renderHistory(); }
+};
+
+window.addEventListener('resize', () => {
+  if (state) positionCaret();
+  if ($('results').classList.contains('show')) drawRunChart();
+  drawHistChart(getHistory());
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+applySettings();
+renderHistory();
+newTest();
+setTimeout(focusInput, 100);
+</script>
+</body>
+</html>
