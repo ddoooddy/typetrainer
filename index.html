@@ -9,12 +9,12 @@
   :root {
     --bg: #323437;
     --bg-alt: #2c2e31;
-    --main: #e2b714;       /* color de acento / letras correctas-caret */
+    --main: #e2b714;
     --caret: #e2b714;
-    --text: #d1d0c5;       /* texto a tipear (pendiente) */
-    --sub: #646669;        /* texto secundario / sin tipear */
-    --correct: #d1d0c5;    /* letra correcta */
-    --error: #ca4754;      /* letra incorrecta */
+    --text: #d1d0c5;
+    --sub: #646669;
+    --correct: #d1d0c5;
+    --error: #ca4754;
     --error-extra: #7e2a33;
     --line: #646669;
     --font: 'Roboto Mono', monospace;
@@ -85,7 +85,6 @@
     justify-content: center; padding: 20px; gap: 28px; position: relative;
   }
 
-  /* stats en vivo */
   .live-stats {
     display: flex; gap: 36px; color: var(--main); font-size: 22px;
     opacity: 0; transition: opacity .2s; min-height: 28px;
@@ -93,16 +92,12 @@
   .live-stats.show { opacity: 1; }
   .live-stats .stat small { display:block; font-size: 12px; color: var(--sub); }
 
-  /* contenedor del texto */
-  #typeWrap {
-    width: 100%; max-width: 1100px; position: relative;
-  }
+  #typeWrap { width: 100%; max-width: 1100px; position: relative; }
   #typeArea {
     position: relative; line-height: 1.6; font-size: var(--font-size);
     color: var(--sub); outline: none; user-select: none;
     max-height: calc(var(--font-size) * 1.6 * 3); overflow: hidden;
   }
-  /* modo "texto se mueve": una sola línea que se desplaza */
   #typeArea.smooth-scroll {
     white-space: nowrap; max-height: calc(var(--font-size) * 1.6);
     overflow: hidden;
@@ -116,7 +111,6 @@
   .letter.extra { color: var(--error-extra); }
   .word.error-word { text-decoration: underline; text-decoration-color: var(--error); text-underline-offset: 4px; }
 
-  /* caret */
   #caret {
     position: absolute; background: var(--caret); border-radius: 2px;
     width: 3px; height: calc(var(--font-size) * 1.05); top: 0; left: 0;
@@ -128,12 +122,8 @@
   #caret.blink { animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* input oculto que captura el tipeo */
-  #hiddenInput {
-    position: absolute; opacity: 0; pointer-events: none; left: -9999px;
-  }
+  #hiddenInput { position: absolute; opacity: 0; pointer-events: none; left: -9999px; }
 
-  /* mensaje "click para enfocar" */
   .focus-warn {
     position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
     color: var(--text); font-size: 16px; cursor: pointer; backdrop-filter: blur(3px);
@@ -149,9 +139,7 @@
   }
   .restart-btn:hover { color: var(--text); background: var(--bg-alt); }
   .hint { color: var(--sub); font-size: 12px; }
-  .hint kbd {
-    background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; color: var(--text); font-size: 11px;
-  }
+  .hint kbd { background: var(--bg-alt); padding: 2px 6px; border-radius: 4px; color: var(--text); font-size: 11px; }
 
   /* ============ RESULTADOS ============ */
   #results { display: none; width: 100%; max-width: 1000px; }
@@ -164,6 +152,21 @@
   .res-grid { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 8px; }
   .res-item { color: var(--sub); font-size: 13px; }
   .res-item b { display: block; font-size: 28px; color: var(--text); font-weight: 500; }
+  .save-row { margin-top: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .pb-badge {
+    background: var(--main); color: var(--bg); font-size: 13px; font-weight: 700;
+    padding: 6px 14px; border-radius: 8px; display: none;
+  }
+  .pb-badge.show { display: inline-block; }
+  .save-btn {
+    background: none; border: 1px solid var(--line); color: var(--text); cursor: pointer;
+    font-family: inherit; font-size: 13px; padding: 7px 16px; border-radius: 8px; transition: .2s;
+    display: none;
+  }
+  .save-btn.show { display: inline-block; }
+  .save-btn:hover { border-color: var(--main); color: var(--main); }
+  .save-btn:disabled { opacity: .5; cursor: default; }
+  .save-note { color: var(--sub); font-size: 12px; }
 
   /* ============ HISTORIAL ============ */
   .history-sec { width: 100%; max-width: 1000px; margin: 10px auto 40px; padding: 0 20px; }
@@ -177,11 +180,14 @@
   canvas { width: 100%; max-width: 100%; display: block; }
   #runChart { height: 160px; }
   #histChart { height: 180px; }
+  #rmChart { height: 140px; }
   table.hist { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.hist th { color: var(--sub); text-align: left; font-weight: 500; padding: 8px 10px; border-bottom: 2px solid var(--bg-alt); }
   table.hist td { padding: 8px 10px; border-bottom: 1px solid var(--bg-alt); color: var(--text); }
+  table.hist tbody tr { cursor: pointer; }
   table.hist tr:hover td { background: var(--bg-alt); }
   .empty-hist { color: var(--sub); font-size: 13px; padding: 14px; text-align: center; }
+  .hist-hint { color: var(--sub); font-size: 11px; margin-top: 8px; }
 
   /* ============ MODAL SETTINGS ============ */
   .overlay {
@@ -214,7 +220,42 @@
     color: var(--text); border-radius: 8px; padding: 10px; font-family: inherit; font-size: 13px; resize: vertical;
   }
 
-  /* aviso de almacenamiento */
+  /* ============ MODAL DE RUN (stats + replay) ============ */
+  .run-modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.96);
+    width: 860px; max-width: 94vw; max-height: 88vh; overflow-y: auto;
+    background: var(--bg-alt); border-radius: 14px; padding: 26px; z-index: 52;
+    display: none; box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    transition: transform .2s;
+  }
+  .run-modal.show { display: block; transform: translate(-50%, -50%) scale(1); }
+  .run-modal h2 { font-size: 17px; color: var(--text); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .run-modal .rm-sub { color: var(--sub); font-size: 12px; margin-bottom: 16px; }
+  .rm-stats { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 16px; }
+  .rm-stat { color: var(--sub); font-size: 12px; }
+  .rm-stat b { display: block; font-size: 26px; color: var(--main); font-weight: 600; }
+  .rm-stat.dim b { color: var(--text); }
+  #rmChartWrap { background: var(--bg); border-radius: 10px; padding: 10px; margin-bottom: 18px; }
+  .rm-replay-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+  .rm-replay-head h3 { color: var(--sub); font-size: 13px; font-weight: 500; }
+  .rm-btn {
+    background: var(--bg); border: none; color: var(--text); cursor: pointer;
+    font-family: inherit; font-size: 13px; padding: 6px 14px; border-radius: 7px; transition: .15s;
+  }
+  .rm-btn:hover { color: var(--main); }
+  select.rm-sel {
+    background: var(--bg); border: 1px solid var(--line); color: var(--text);
+    font-family: inherit; font-size: 12px; padding: 4px 8px; border-radius: 6px;
+  }
+  .rm-live { color: var(--main); font-size: 13px; margin-left: auto; }
+  #replayWords {
+    background: var(--bg); border-radius: 10px; padding: 16px;
+    font-size: 20px; line-height: 1.7; color: var(--sub); max-height: 220px; overflow-y: auto;
+  }
+  #replayWords .word { display: inline-block; margin: 0 .3em; }
+  .rp-caret { box-shadow: inset 2px 0 0 var(--caret); }
+  .rm-noreplay { color: var(--sub); font-size: 13px; padding: 10px 0; }
+
   .storage-warn {
     display: none; background: var(--error-extra); color: var(--text);
     font-size: 12px; padding: 6px 14px; border-radius: 8px; margin: 0 auto;
@@ -247,10 +288,10 @@
     <button class="config-btn" data-mode="custom">✎ propio</button>
   </div>
   <div class="config-group" id="grpAmount"></div>
-  <div class="config-group" id="grpLang">
-    <button class="config-btn" data-lang="es">español</button>
-    <button class="config-btn" data-lang="en">inglés</button>
-    <button class="config-btn" data-lang="mix">mezcla</button>
+  <div class="config-group" id="grpDiff">
+    <button class="config-btn" data-diff="easy">fácil</button>
+    <button class="config-btn" data-diff="medium">normal</button>
+    <button class="config-btn" data-diff="hard">difícil</button>
   </div>
 </div>
 
@@ -283,7 +324,7 @@
         <div class="res-big"><b id="rAcc">0%</b>precisión</div>
       </div>
       <div class="res-chart-wrap">
-        <canvas id="runChart" height="160"></canvas>
+        <canvas id="runChart"></canvas>
       </div>
     </div>
     <div class="res-grid">
@@ -293,18 +334,24 @@
       <div class="res-item"><b id="rErrors">0</b>errores</div>
       <div class="res-item"><b id="rChars">0</b>caracteres</div>
     </div>
+    <div class="save-row">
+      <span class="pb-badge" id="pbBadge">🏆 ¡Nuevo PB! guardado automáticamente</span>
+      <button class="save-btn" id="saveRunBtn">💾 guardar run</button>
+      <span class="save-note" id="saveNote"></span>
+    </div>
   </div>
 </main>
 
 <!-- HISTORIAL -->
 <div class="history-sec">
   <h2>Historial <button id="clearHist">borrar historial</button></h2>
-  <div id="histChartWrap"><canvas id="histChart" height="180"></canvas></div>
+  <div id="histChartWrap"><canvas id="histChart"></canvas></div>
   <table class="hist">
-    <thead><tr><th>Fecha</th><th>WPM</th><th>Precisión</th><th>Modo</th><th>Consist.</th></tr></thead>
+    <thead><tr><th>Fecha</th><th>WPM</th><th>Precisión</th><th>Modo</th><th>Consist.</th><th></th></tr></thead>
     <tbody id="histBody"></tbody>
   </table>
-  <div class="empty-hist" id="emptyHist">Todavía no hay runs guardadas. ¡Hacé tu primer test!</div>
+  <div class="empty-hist" id="emptyHist">Todavía no hay runs guardadas. Los PB se guardan solos; el resto con el botón 💾.</div>
+  <div class="hist-hint">Click en una run para ver sus stats y hacer replay del tipeo.</div>
 </div>
 
 <footer>Hecho con HTML, CSS y JS puro · <kbd>Tab</kbd> para reiniciar rápido</footer>
@@ -367,10 +414,27 @@
   </div>
 
   <div class="setting">
-    <label>Sonido de tecla</label>
+    <label>Sonido de teclado</label>
     <div class="opt-row" id="soundOpts">
-      <button class="opt" data-sound="on">Activado</button>
-      <button class="opt" data-sound="off">Desactivado</button>
+      <button class="opt" data-sound="off">Sin sonido</button>
+      <button class="opt" data-sound="click">Click</button>
+      <button class="opt" data-sound="thock">Mecánico</button>
+      <button class="opt" data-sound="pop">Pop</button>
+      <button class="opt" data-sound="beep">Beep</button>
+      <button class="opt" data-sound="typewriter">Máquina de escribir</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Volumen <span class="range-val" id="volVal">50%</span></label>
+    <input type="range" id="volRange" min="0" max="100" step="5" value="50">
+  </div>
+
+  <div class="setting">
+    <label>Sonido de error (al equivocarte)</label>
+    <div class="opt-row" id="errSoundOpts">
+      <button class="opt" data-errsound="on">Activado</button>
+      <button class="opt" data-errsound="off">Desactivado</button>
     </div>
   </div>
 
@@ -379,6 +443,34 @@
     <textarea id="customText" placeholder="Pegá acá tu texto y elegí el modo 'propio' arriba..."></textarea>
   </div>
 </aside>
+
+<!-- MODAL DE RUN -->
+<div class="run-modal" id="runModal">
+  <h2><span id="rmTitle">Run</span> <button class="icon-btn" id="closeRunModal">✕</button></h2>
+  <div class="rm-sub" id="rmDate"></div>
+  <div class="rm-stats">
+    <div class="rm-stat"><b id="rmWpm">0</b>wpm</div>
+    <div class="rm-stat dim"><b id="rmRaw">0</b>raw</div>
+    <div class="rm-stat dim"><b id="rmAcc">0%</b>precisión</div>
+    <div class="rm-stat dim"><b id="rmConsist">0%</b>consistencia</div>
+    <div class="rm-stat dim"><b id="rmTime">0s</b>tiempo</div>
+    <div class="rm-stat dim"><b id="rmErrors">0</b>errores</div>
+  </div>
+  <div id="rmChartWrap"><canvas id="rmChart"></canvas></div>
+  <div class="rm-replay-head">
+    <h3>Replay</h3>
+    <button class="rm-btn" id="rmPlay">▶ reproducir</button>
+    <select class="rm-sel" id="rmSpeed">
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="2">2x</option>
+      <option value="4">4x</option>
+    </select>
+    <span class="rm-live" id="rmLive"></span>
+  </div>
+  <div id="replayWords"></div>
+  <div class="rm-noreplay" id="rmNoReplay" style="display:none">Esta run es de una versión anterior y no tiene datos de replay.</div>
+</div>
 
 <script>
 "use strict";
@@ -412,12 +504,15 @@ const Store = (() => {
 if (!Store.available) document.getElementById('storageWarn').classList.add('show');
 
 /* =========================================================
-   LISTAS DE PALABRAS
+   DICCIONARIO — tres niveles de dificultad
    ========================================================= */
-const WORDS = {
-  es: "el la de que y a en un ser se no haber por con su para como estar tener le lo todo pero más hacer o poder decir este ir otro ese si me ya ver porque dar cuando él muy sin vez mucho saber qué sobre mi alguno mismo yo también hasta año dos querer entre así primero desde grande eso ni nos llegar pasar tiempo ella sí día uno bien poco deber entonces poner cosa tanto hombre parecer nuestro tan donde ahora parte después vida quedar siempre creer hablar llevar dejar nada cada seguir menos nuevo encontrar algo solo casa mundo agua noche cielo fuego viento camino puerta luz sombra fuerza palabra".split(" "),
-  en: "the be to of and a in that have i it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us".split(" ")
-};
+const W_EASY = ("the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us is was are been has had did says made find here thing many tell ask men call world still hand high every life need too right old man get come may part such case week company where system each right program question during play government number night point home water room mother area money story fact month lot study book eye job word business issue side kind head house service friend father power hour game line end member law car city community name team minute idea body face others level office door health person art war history party result change morning reason girl guy moment air teacher force education foot boy age policy process music market sense nation plan college interest death experience effort class control care field development role effect rate heart drug show leader light voice wife whole police mind price report decision son view relationship town road arm difference value building action model season society tax director position player record paper space ground form event official matter center couple site project activity star table court oil situation cost industry figure street tree else love open walk run sit set sun fun big red hot top box cat dog bed cup hat leg map pen pig sky toy van win yes zoo arm bag bus cut dry ear egg eat far fit fly gas gun ice jam key kid lip log mad mix net nut odd pan pet pin pot rat raw rib row rub sad sea son tap tea ten tip toe ton tub two war wax web wet zip").split(" ");
+
+const W_MEDIUM = ("ability absence academy account accurate achieve acquire address advance advice afford agency agenda agreement ahead alarm album alcohol alive almost alone already although always amazing amount analyst ancient anger angle animal annual answer anxiety anybody apart apartment apology apparent appeal appear apple apply appoint approach approve argue arise around arrange arrest arrive arrow article artist asleep aspect assault assert assess assign assist assume attach attack attempt attend attitude attract audience author autumn average avoid award aware awful awkward badge balance ballet balloon banana banner bargain barrel barrier basket battery battle beach beard beauty became bedroom before begin behalf behave behind belief belong below bench benefit beside besides better between beyond bicycle billion biology bishop bitter blame blanket blind block blood board boast bonus border borrow bottle bottom bounce branch brand brave bread breath bridge brief bright broad broken brother brown brush bubble bucket budget builder bullet bundle burden bureau burst butter button cabin cable camera campaign campus canal cancel candle candy canvas capable capital captain capture carbon career careful cargo carpet carrot carry cartoon castle casual catalog catch cattle caught ceiling cement census center century cereal certain chain chair chalk challenge chamber chance change chapter charge charity charm chart chase cheap check cheek cheese chest chicken chief choice choose chorus chosen chunk circle citizen civil claim classic clean clerk clever client climate climb clinic clock close cloth cloud cluster coach coast coffee collar collect column combat combine comedy comfort command comment commit common compare compete complain complete complex concept concern concert conclude concrete conduct confess confirm conflict confuse connect consist constant consult consume contact contain content contest context contract control convert convince cookie copper corner correct corridor cotton could council counter country county couple courage course cousin cover craft crash cream create credit crime crisis critic cross crowd crucial cruel crush crystal culture curious current curtain curve custom cycle damage dance danger daring darkness daughter dealer debate decade decent decide declare decline decorate decrease deeply defeat defend define degree delay deliver demand depend deposit depth derive describe desert design desire desktop despite destroy detail detect device devote dialog diamond differ digital dinner direct dirty disagree discount discover discuss disease dismiss display dispute distance distant diverse divide doctor domain double doubt dozen draft dragon drama drawer dream dress drink driver drove during dust duty eager early earn earth easily eastern economy edge editor effect effort eight either elder electric element elite email emerge emotion empire employ empty enable energy engage engine enhance enjoy enough ensure enter entire entrance entry equal equip error escape essay estate evening event evil exact examine example exceed excel except excess exchange excited excuse exercise exhaust exhibit exist exit expand expect expense expert explain explore export expose express extend extent extra fabric factor faculty failure fairly faith family famous fancy fantasy farmer fatal fault favor feature fellow female fence festival fiber fiction fifteen fifty fight final finance finger finish fiscal fitness flame flavor flight float flood floor flour flow flower fluid focus follow forest forget formal format former fortune forum forward foster fourth fragile frame fresh friday fridge frozen fruit fuel funny future gallery gamble garage garden garlic gather gender general genre gentle genuine gesture ghost giant gift glance global glory glove golden gossip grade gradual grand grant grape grasp grass grateful gravity great green grocery growth guard guess guest guide guilty guitar habit hammer handle happen happy harbor hardly harsh harvest hazard healthy heaven heavy height hello helmet helpful herself hidden highway hobby hockey hollow honest honey honor horizon horror horse hotel humble humor hungry hunter hurry ignore illegal image impact import impose improve inch income indeed index indoor infant inform initial injury inner input inquiry insect inside insight insist inspire install instead intend intense invest invite invoke island issue jacket jealous jewel joint journal judge juice jungle junior justice justify keyboard kidney kingdom kitchen knife labor ladder lately latter laugh launch lawyer layer leader league leather lecture legacy legal legend leisure lemon length lesson letter liberal library license likely limit linear liquid listen little lively living lobby local logic lonely loose lovely loyal lucky luggage lunch luxury machine magic mainly major mammal manage manner manual margin marine market master match material matrix mature maximum maybe mayor meadow medal media medium member memory mental mention menu merchant mercy merely merge merit message metal method middle might milk million mineral minimum minor minute miracle mirror missile mission mistake mixture mobile modern modest modify moment monitor monkey monster monthly morning mostly motion motor mount mouse mouth movie murder muscle museum mutual myself mystery narrow nation native nature nearby nearly needle negative neither nephew nerve network never newly noble nobody noise normal north notably nothing notice notion novel nuclear nurse object obtain obvious occupy occur ocean offer office often onion online opera opinion oppose option orange orbit order organ origin other ought ounce outcome outdoor output outside oven overall owner oxygen packet palace panel panic parade parent parking partial partly partner passage passion patent path patient pattern pause peace peanut pencil pension pepper percent perfect perform perhaps period permit person phase phone photo phrase piano picture piece pillow pilot pitch pizza place plain planet plant plastic plate platform pleasant pledge plenty pocket poem poetry point poison policy polish polite poll pollution popular portion possess possible poster potato pottery pound poverty powder powerful praise prayer precise predict prefer premium prepare presence preserve press pretty prevent previous price pride priest primary prince print prior prison private prize probably problem proceed produce product profile profit promise promote prompt proof proper propose protect protein protest proud prove provide public publish pull pulse pump punish pupil puppy purchase pure purple purpose pursue push puzzle quality quarter queen question quick quiet quite quote rabbit racing radar radio rail rain raise rally random range rapid rarely rather rating reach react reader ready really rebel recall receive recent recipe record recover reduce refer reflect reform refuse regard regime region regret regular reject relate relax release relief rely remain remark remedy remind remote remove rental repair repeat replace reply report rescue research reserve resign resist resolve resort resource respect respond rest result retail retain retire return reveal revenue review reward rhythm ribbon rice rich ride rifle rigid ring rise risk rival river robot rocket roll romance rough round route royal rubber rude rural rush sacred saddle safety salad salary sample sandal satisfy sauce savage scale scandal scare scatter scene scheme scholar science scope score scratch screen script search season second secret section sector secure seek seize seldom select sell seminar senate senior sentence series serious serve session settle seven severe shade shadow shake shallow shame shape share sharp sheep sheet shelf shell shelter shift shine ship shock shoot shopping shore short shoulder shout shower shrink shut sight signal silence silent silly silver similar simple since singer single sister skill skirt slave sleep slice slide slight slogan slope slow small smart smell smile smoke smooth snake social sodium soft software solar soldier solid solve someone song sorry sort soul sound soup source south space spare speak special specific speech speed spend sphere spice spider spirit split sponsor spoon sport spray spread spring square squeeze stable stadium staff stage stair stake stamp stand staple start state station statue status steady steal steam steel steep stick still stock stomach stone storage store storm story strange stream street stress stretch strict strike string strip stroke strong studio stuff stupid style subject submit subtle suburb succeed sudden suffer sugar suggest summer summit sunset super supply support suppose supreme sure surface surgery surplus survey survive suspect sustain swear sweet swing switch symbol system tackle tactic talent target task taste teach tender tennis tension terror thank theater theme theory thick thin thirty threat three throw thumb ticket tidy tiger tight timber tiny tired tissue title toast tobacco token tomato tongue tonight tool tooth topic total touch tough tour toward tower track trade traffic tragedy trail train transit travel treat trend trial tribe trick trip troop trouble truck truly trust truth tunnel turkey twelve twenty twice twin type typical umbrella unable uncle under unfair uniform union unique unit unity unlike until update upgrade upon upper upset urban urge useful usual valid valley value vary vast vector vehicle vendor venture verbal verse version very vessel veteran victim victory video village violent virtue visible vision visit visual vital vivid vocal volume vote wage wagon waist wander warm warn waste watch wealth weapon weather wedding weekend weekly weight welcome welfare western whale wheat wheel while whisper widely widow width wild willing window winner winter wire wisdom wise within witness wolf wonder wooden worker worry worth wound wrap wrist write wrong yard yellow yield young youth zone").split(" ");
+
+const W_HARD = ("abbreviation absolutely accommodate accomplishment accountability acknowledgment acquisition administration advertisement agriculture algorithm alternative ambiguous amendment anniversary announcement anticipate apparatus appreciation appropriate approximately arbitrary archaeology architecture arrangement assassination assessment assignment association assumption astonishing atmosphere authentic authority automatically availability bacteria bankruptcy beneficial biography boundary breakthrough broadcasting bureaucracy calculation candidate capability catastrophe celebration certificate characteristic chromosome circumstance civilization classification collaborate combination commemorate commentary commercial commission commitment communication community comparison compatibility compensation competition complicated comprehension compromise concentration conclusion confidential configuration confrontation congratulate congressional connection consciousness consequence conservative considerable conspiracy constellation constitution construction consultant contemporary continuously contradiction contribution controversial convenience conventional conversation cooperation coordination correspondence corruption counterpart courageous creativity credibility curriculum customary decision declaration dedication deficiency definitely deliberately democracy demonstration department dependency description desperately destination deterioration determination development dictionary differentiate difficulty dimension diplomatic disability disappointment disciplinary discrimination distinguish distribution documentary documentation dramatically eccentric economics editorial effectiveness efficiency electricity elementary embarrassment emergency emphasize encouragement encyclopedia engineering enthusiasm entrepreneur environment equilibrium equivalent essentially establishment evaluation eventually evolution exaggerate examination exceptional executive exhibition expectation expedition experimental explanation extension extraordinary fascinating financial flexibility fluctuation foundation framework frequency fundamental furthermore generation generosity geography government gradually grammatical gratitude guarantee gymnasium hallucination headquarters hemisphere hierarchy historical horizontal hospitality humanitarian hypothesis identification illustration imagination immediately immigration implementation impossible impression improvement incomprehensible incorporate incredible independence indication individual industrial inevitable influential information infrastructure ingredient inhabitant initiative innovation inspiration installation institution instruction instrument insurance integration intellectual intelligence intention interaction international interpretation intersection intervention introduction investigation invitation irrelevant jurisdiction justification kaleidoscope kilometer knowledge laboratory landscape legislation legitimate lieutenant literature longitude magnificent maintenance management manufacture mathematics measurement mechanism medication membership metropolitan microphone millennium miscellaneous misunderstanding modification momentum monument motivation multimedia municipal mysterious necessarily negotiation neighborhood nevertheless nomination notorious nutrition obligation observation occasionally occupation operation opportunity opposition optimistic organization orientation overwhelming parliament participant participation particularly partnership perception performance permanent permission perpendicular persistence personality perspective persuasion phenomenon philosophy photograph photography physician politician population possession potentially practically precedent precisely prediction predecessor preference preliminary preparation prescription presentation preservation presidential presumably prevention previously primarily principle priority probability procedure proclamation production professional proficiency progression prohibition projection prominent pronunciation proportion proposition prosecution prosperity protection psychological psychology publication punishment qualification quantity questionnaire radiation reaction reasonable recognition recommendation reconciliation recreation reduction redundant reference refrigerator registration regulation rehabilitation relationship relatively reluctant remarkable repetition representative reputation requirement reservation residential resignation resolution responsibility restaurant restriction retirement revolutionary satisfaction scholarship scientific sculpture secondary secretary segregation sensitive separation settlement significance significantly simultaneously situation sophisticated specialist specifically spectacular speculation spontaneous statistics stimulation straightforward strategic structural subscription substantial substitute successfully sufficient suggestion supervision supplement surveillance susceptible suspension sympathetic symptom synthesis systematic technological telescope temperature temporary terminology territory testimony theoretical thermometer thoroughly tournament traditional trajectory transaction transformation transition transportation tremendous triumphant ultimately unanimous uncertainty unconscious undergraduate understanding undoubtedly unemployment unexpectedly unfortunately universal university unprecedented vaccination variation vegetable vegetation versatile vertical victorious vocabulary volcanic volunteer vulnerable warehouse watermelon wilderness withdrawal").split(" ");
+
+const POOLS = { easy: W_EASY, medium: W_MEDIUM, hard: W_HARD };
 
 /* =========================================================
    ESTADO Y SETTINGS
@@ -429,15 +524,20 @@ const DEFAULTS = {
   move: 'caret',
   caret: 'line',
   anim: 'smooth',
-  sound: 'off',
-  testType: 'time',   // time | words | custom
-  amount: 30,         // segundos o palabras
-  lang: 'es',
+  sound: 'off',       // off | click | thock | pop | beep | typewriter
+  volume: 50,
+  errSound: 'off',
+  testType: 'time',
+  amount: 30,
+  difficulty: 'medium',
   customText: ''
 };
 let S = Object.assign({}, DEFAULTS, Store.get('tt_settings', {}));
+// migración de settings viejos
+if (S.sound === 'on') S.sound = 'beep';
+if (!POOLS[S.difficulty]) S.difficulty = 'medium';
 
-const AMOUNTS = { time: [15, 30, 60], words: [10, 25, 50] };
+const AMOUNTS = { time: [15, 30, 60], words: [10, 25, 50, 100] };
 
 /* =========================================================
    ELEMENTOS
@@ -450,52 +550,58 @@ const wordsEl = $('words'), caretEl = $('caret'), typeArea = $('typeArea'),
    MOTOR DEL TEST
    ========================================================= */
 let state = null;
+let pendingRun = null;   // run sin guardar (botón 💾)
 
 function genWords(n) {
   if (S.testType === 'custom') {
     const t = (S.customText || '').trim();
     if (t) return t.split(/\s+/);
-    return WORDS.es.slice(0, 25);
+    return POOLS.easy.slice(0, 25);
   }
-  let pool;
-  if (S.lang === 'es') pool = WORDS.es;
-  else if (S.lang === 'en') pool = WORDS.en;
-  else pool = WORDS.es.concat(WORDS.en);
+  const pool = POOLS[S.difficulty] || POOLS.medium;
   const out = [];
   for (let i = 0; i < n; i++) out.push(pool[Math.floor(Math.random() * pool.length)]);
   return out;
 }
 
+function clearTimers() {
+  if (!state) return;
+  clearInterval(state.timer); clearInterval(state.sampleTimer);
+  state.timer = null; state.sampleTimer = null;
+}
+
 function newTest() {
+  clearTimers();   // CLAVE: mata los intervalos del test anterior (bug del tiempo acelerado)
+
   let list;
   if (S.testType === 'words') list = genWords(S.amount);
   else if (S.testType === 'custom') list = genWords(0);
-  else list = genWords(60); // tiempo: pool grande, se regenera si hace falta
+  else list = genWords(60);
 
   state = {
     words: list,
-    typed: [],          // array de strings tipeados por palabra
-    wi: 0,              // índice de palabra
+    typed: [''],
+    wi: 0,
     started: false,
     startTime: 0,
     finished: false,
     timer: null,
-    timeLeft: S.testType === 'time' ? S.amount : null,
-    wpmSeries: [],      // [{t, wpm, raw, errors}]
     sampleTimer: null,
+    wpmSeries: [],
+    events: [],
     correctChars: 0,
     incorrectChars: 0,
     totalKeys: 0,
     lastErrorsSnapshot: 0
   };
-  state.typed = [''];
+  pendingRun = null;
 
   $('results').classList.remove('show');
   typeWrap.style.display = 'block';
   $('restartRow').style.display = 'flex';
   liveStats.classList.remove('show');
   renderWords();
-  updateLiveStats(0, 0, 100);
+  updateLiveStats(0, 100);
   $('liveTime').innerHTML = (S.testType === 'time' ? S.amount : 0) + '<small>tiempo</small>';
   requestAnimationFrame(positionCaret);
   focusInput();
@@ -510,26 +616,24 @@ function renderWords() {
   });
   wordsEl.innerHTML = html;
   wordsEl.style.transform = 'translateX(0)';
-  paintAll();
+  caretEl.style.transform = '';
 }
 
-/* repinta el estado de la palabra actual y previas */
-function paintWord(i) {
-  const wordEl = wordsEl.children[i];
+function paintWord(i, container, st) {
+  container = container || wordsEl;
+  st = st || state;
+  const wordEl = container.children[i];
   if (!wordEl) return;
-  const target = state.words[i];
-  const typed = state.typed[i] || '';
-  const letters = wordEl.querySelectorAll('.letter');
-  // limpiar extras anteriores
+  const target = st.words[i];
+  const typed = st.typed[i] || '';
   wordEl.querySelectorAll('.letter.extra').forEach(e => e.remove());
+  const letters = wordEl.querySelectorAll('.letter');
   letters.forEach((le, j) => {
-    if (le.classList.contains('extra')) return;
     le.classList.remove('correct', 'incorrect');
     if (j < typed.length) {
       le.classList.add(typed[j] === target[j] ? 'correct' : 'incorrect');
     }
   });
-  // caracteres extra (más largos que la palabra)
   if (typed.length > target.length) {
     for (let j = target.length; j < typed.length; j++) {
       const ex = document.createElement('span');
@@ -538,14 +642,9 @@ function paintWord(i) {
       wordEl.appendChild(ex);
     }
   }
-  // marcar palabra con error si ya pasó y quedó mal
-  if (i < state.wi) {
-    wordEl.classList.toggle('error-word', typed !== target);
-  } else {
-    wordEl.classList.remove('error-word');
-  }
+  if (i < st.wi) wordEl.classList.toggle('error-word', typed !== target);
+  else wordEl.classList.remove('error-word');
 }
-function paintAll() { state.words.forEach((_, i) => paintWord(i)); }
 
 /* =========================================================
    CARET
@@ -566,8 +665,6 @@ function positionCaret() {
       left = rect.left - areaRect.left; top = rect.top - areaRect.top;
     } else { left = 0; top = 0; }
   } else {
-    const idx = Math.min(typed.length, letters.length) - 1;
-    const le = letters[Math.min(typed.length - 1, letters.length - 1)];
     if (typed.length >= letters.length) {
       rect = letters[letters.length - 1].getBoundingClientRect();
       left = rect.right - areaRect.left;
@@ -578,7 +675,6 @@ function positionCaret() {
     top = rect.top - areaRect.top;
   }
 
-  // modo "texto se mueve": desplazar #words para mantener caret centrado
   if (S.move === 'text') {
     const centerX = typeArea.clientWidth / 2;
     const shift = Math.max(0, left - centerX);
@@ -586,18 +682,15 @@ function positionCaret() {
     caretEl.style.left = (left - shift) + 'px';
     caretEl.style.top = top + 'px';
   } else {
-    wordsEl.style.transform = 'translateX(0)';
     caretEl.style.left = left + 'px';
     caretEl.style.top = top + 'px';
-    // scroll vertical suave entre líneas (modo caret)
     scrollToLine(top);
   }
 }
 
 function scrollToLine(top) {
   const lineH = parseFloat(getComputedStyle(typeArea).fontSize) * 1.6;
-  // mantener el caret en las primeras 2 líneas visibles
-  const offset = Math.max(0, Math.floor(top / lineH) - 1) * lineH;
+  const offset = Math.max(0, Math.floor((top + 2) / lineH) - 1) * lineH;
   wordsEl.style.transform = `translateY(${-offset}px)`;
   caretEl.style.transform = `translateY(${-offset}px)`;
 }
@@ -606,45 +699,49 @@ function scrollToLine(top) {
    ENTRADA DE TECLADO
    ========================================================= */
 function onInput(key) {
-  if (state.finished) return;
+  if (!state || state.finished) return;
   if (!state.started) startTest();
+
+  // grabar evento para replay (B = backspace)
+  if (state.events.length < 8000) {
+    state.events.push({ t: Math.round(performance.now() - state.startTime), k: key === 'Backspace' ? 'B' : key });
+  }
 
   state.totalKeys++;
   const target = state.words[state.wi];
 
   if (key === ' ') {
-    if ((state.typed[state.wi] || '').length === 0) return; // ignorar espacio al inicio
-    // avanzar de palabra
+    if ((state.typed[state.wi] || '').length === 0) return;
     paintWord(state.wi);
     state.wi++;
     if (!state.typed[state.wi]) state.typed[state.wi] = '';
-    // en modo tiempo, generar más palabras si se acaban
     if (S.testType === 'time' && state.wi >= state.words.length - 5) {
       state.words = state.words.concat(genWords(30));
       appendWordsDOM();
     }
-    if (S.testType !== 'time' && state.wi >= state.words.length) {
-      finishTest();
-      return;
-    }
+    if (S.testType !== 'time' && state.wi >= state.words.length) { finishTest(); return; }
   } else if (key === 'Backspace') {
     let t = state.typed[state.wi] || '';
-    if (t.length > 0) {
-      state.typed[state.wi] = t.slice(0, -1);
-    } else if (state.wi > 0) {
-      state.wi--;
-    }
+    if (t.length > 0) state.typed[state.wi] = t.slice(0, -1);
+    else if (state.wi > 0) state.wi--;
     paintWord(state.wi);
   } else if (key.length === 1) {
     const t = state.typed[state.wi] || '';
-    if (t.length >= target.length + 10) return; // límite de extras
+    if (t.length >= target.length + 10) return;
     state.typed[state.wi] = t + key;
-    // contabilizar correcto/incorrecto
     const pos = t.length;
-    if (key === target[pos]) state.correctChars++;
-    else state.incorrectChars++;
+    const good = key === target[pos];
+    if (good) state.correctChars++; else state.incorrectChars++;
     paintWord(state.wi);
-    playSound();
+    playKeySound(good);
+    // en modos con final, terminar al completar la última palabra (sin necesidad de espacio)
+    if (S.testType !== 'time' && state.wi === state.words.length - 1 &&
+        state.typed[state.wi].length >= target.length) {
+      paintWord(state.wi);
+      state.wi++; // marca la última como "pasada" para pintarla bien
+      finishTest();
+      return;
+    }
   }
   positionCaret();
   liveUpdate();
@@ -669,22 +766,22 @@ function startTest() {
   state.startTime = performance.now();
   liveStats.classList.add('show');
 
-  // muestreo por segundo para el gráfico y consistencia
   state.sampleTimer = setInterval(() => {
     if (state.finished) return;
     const elapsed = (performance.now() - state.startTime) / 1000;
     const { wpm, raw } = calcWpm(elapsed);
-    const errNow = state.incorrectChars;
-    state.wpmSeries.push({ t: Math.round(elapsed), wpm, raw, errors: errNow - state.lastErrorsSnapshot });
-    state.lastErrorsSnapshot = errNow;
+    state.wpmSeries.push({ t: Math.round(elapsed), wpm, raw });
   }, 1000);
 
   if (S.testType === 'time') {
+    // countdown basado en tiempo real (sin drift ni stacking)
     state.timer = setInterval(() => {
-      state.timeLeft--;
-      $('liveTime').innerHTML = state.timeLeft + '<small>tiempo</small>';
-      if (state.timeLeft <= 0) finishTest();
-    }, 1000);
+      if (state.finished) return;
+      const elapsed = (performance.now() - state.startTime) / 1000;
+      const remaining = Math.max(0, Math.ceil(S.amount - elapsed));
+      $('liveTime').innerHTML = remaining + '<small>tiempo</small>';
+      if (elapsed >= S.amount) finishTest();
+    }, 200);
   }
 }
 
@@ -707,31 +804,42 @@ function liveUpdate() {
   if (!state.started) return;
   const elapsed = (performance.now() - state.startTime) / 1000;
   const { wpm } = calcWpm(elapsed);
-  updateLiveStats(wpm, Math.round(elapsed), accuracy());
+  updateLiveStats(wpm, accuracy());
   if (S.testType !== 'time') $('liveTime').innerHTML = Math.round(elapsed) + '<small>tiempo</small>';
 }
-function updateLiveStats(wpm, time, acc) {
+function updateLiveStats(wpm, acc) {
   $('liveMain').innerHTML = wpm + '<small>wpm</small>';
   $('liveAcc').innerHTML = acc + '%<small>precisión</small>';
 }
 
 /* =========================================================
-   FIN DEL TEST + RESULTADOS
+   FIN DEL TEST + RESULTADOS + GUARDADO (PB auto / manual)
    ========================================================= */
+function modeKey() {
+  if (S.testType === 'custom') return 'custom';
+  return `${S.testType}-${S.amount}-${S.difficulty}`;
+}
+function modeLabel() {
+  const diff = { easy: 'fácil', medium: 'normal', hard: 'difícil' }[S.difficulty];
+  if (S.testType === 'time') return `tiempo ${S.amount}s · ${diff}`;
+  if (S.testType === 'words') return `${S.amount} palabras · ${diff}`;
+  return 'texto propio';
+}
+
 function finishTest() {
   if (state.finished) return;
   state.finished = true;
-  clearInterval(state.timer);
-  clearInterval(state.sampleTimer);
+  clearTimers();
 
   const elapsed = Math.max(0.5, (performance.now() - state.startTime) / 1000);
   const { wpm, raw } = calcWpm(elapsed);
   const acc = accuracy();
+  // punto final para que el gráfico siempre tenga datos
+  state.wpmSeries.push({ t: Math.round(elapsed * 10) / 10, wpm, raw });
   const consist = consistency();
   const errors = state.incorrectChars;
   const chars = state.correctChars + state.incorrectChars;
 
-  // pantalla de resultados
   $('rWpm').textContent = wpm;
   $('rAcc').textContent = acc + '%';
   $('rRaw').textContent = raw;
@@ -745,19 +853,48 @@ function finishTest() {
   $('results').classList.add('show');
   drawRunChart();
 
-  // guardar run
-  const modeLabel = S.testType === 'time' ? `tiempo ${S.amount}s`
-                  : S.testType === 'words' ? `${S.amount} palabras`
-                  : 'texto propio';
+  // ---- guardado: PB automático, resto manual ----
   const run = {
-    date: Date.now(), wpm, raw, acc, consist, errors, time: Math.round(elapsed),
-    mode: modeLabel, lang: S.lang
+    date: Date.now(), wpm, raw, acc, consist, errors, time: Math.round(elapsed * 10) / 10,
+    mode: modeLabel(), key: modeKey(),
+    words: state.words.slice(0, state.wi + 1),
+    events: state.events,
+    series: state.wpmSeries
   };
-  saveRun(run);
-  renderHistory();
+  const valid = chars >= 10 && elapsed >= 2;
+  const badge = $('pbBadge'), btn = $('saveRunBtn'), note = $('saveNote');
+  badge.classList.remove('show'); btn.classList.remove('show'); btn.disabled = false;
+  btn.textContent = '💾 guardar run'; note.textContent = '';
+
+  if (!valid) {
+    note.textContent = 'run muy corta — no se guarda';
+    return;
+  }
+  const pbs = Store.get('tt_pb', {});
+  const prev = pbs[run.key] || 0;
+  if (wpm > prev) {
+    pbs[run.key] = wpm;
+    Store.set('tt_pb', pbs);
+    saveRun(run);
+    badge.textContent = prev > 0 ? `🏆 ¡Nuevo PB! (anterior: ${prev}) — guardado automático` : '🏆 ¡Primer PB del modo! — guardado automático';
+    badge.classList.add('show');
+    renderHistory();
+  } else {
+    pendingRun = run;
+    btn.classList.add('show');
+    note.textContent = `PB actual del modo: ${prev} wpm`;
+  }
 }
 
-/* consistencia = 100 - coef. de variación de la serie de wpm (en %) */
+$('saveRunBtn').onclick = () => {
+  if (!pendingRun) return;
+  saveRun(pendingRun);
+  pendingRun = null;
+  $('saveRunBtn').disabled = true;
+  $('saveRunBtn').textContent = '✓ guardada';
+  renderHistory();
+};
+
 function consistency() {
   const arr = state.wpmSeries.map(s => s.raw).filter(v => v > 0);
   if (arr.length < 2) return 100;
@@ -769,12 +906,11 @@ function consistency() {
 }
 
 /* =========================================================
-   GRÁFICO DE LA RUN (canvas)
+   GRÁFICOS (canvas, sin librerías)
    ========================================================= */
 function drawRunChart() {
-  const canvas = $('runChart');
   const data = state.wpmSeries;
-  drawLineChart(canvas, data.map(d => d.wpm), data.map(d => d.raw), data.map(d => d.t + 's'));
+  drawLineChart($('runChart'), data.map(d => d.wpm), data.map(d => d.raw), data.map(d => d.t + 's'));
 }
 
 function drawLineChart(canvas, wpmArr, rawArr, labels) {
@@ -789,48 +925,45 @@ function drawLineChart(canvas, wpmArr, rawArr, labels) {
   const css = getComputedStyle(document.body);
   const main = css.getPropertyValue('--main').trim();
   const sub = css.getPropertyValue('--sub').trim();
-  const errCol = css.getPropertyValue('--error').trim();
 
   const pad = { l: 34, r: 12, t: 14, b: 22 };
   const W = cssW - pad.l - pad.r, H = cssH - pad.t - pad.b;
   if (!wpmArr.length) {
     ctx.fillStyle = sub; ctx.font = '12px monospace';
-    ctx.fillText('sin datos suficientes', pad.l, cssH / 2); return;
+    ctx.fillText('sin datos', pad.l, cssH / 2); return;
   }
   const maxV = Math.max(10, ...wpmArr, ...rawArr) * 1.15;
 
-  // grilla horizontal
-  ctx.strokeStyle = sub; ctx.globalAlpha = .2; ctx.lineWidth = 1;
-  ctx.fillStyle = sub; ctx.font = '10px monospace'; ctx.globalAlpha = 1;
+  ctx.font = '10px monospace';
   for (let g = 0; g <= 4; g++) {
     const y = pad.t + H - (H * g / 4);
-    ctx.globalAlpha = .15; ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + W, y); ctx.stroke();
-    ctx.globalAlpha = .6; ctx.fillText(Math.round(maxV * g / 4), 4, y + 3);
+    ctx.strokeStyle = sub; ctx.globalAlpha = .15; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + W, y); ctx.stroke();
+    ctx.fillStyle = sub; ctx.globalAlpha = .6;
+    ctx.fillText(Math.round(maxV * g / 4), 4, y + 3);
   }
   ctx.globalAlpha = 1;
 
   const X = i => pad.l + (wpmArr.length === 1 ? W / 2 : W * i / (wpmArr.length - 1));
   const Y = v => pad.t + H - (H * v / maxV);
 
-  // línea raw (tenue)
-  ctx.strokeStyle = sub; ctx.lineWidth = 1.5; ctx.globalAlpha = .5;
-  ctx.beginPath();
-  rawArr.forEach((v, i) => i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)));
-  ctx.stroke(); ctx.globalAlpha = 1;
+  if (rawArr.some(v => v > 0)) {
+    ctx.strokeStyle = sub; ctx.lineWidth = 1.5; ctx.globalAlpha = .5;
+    ctx.beginPath();
+    rawArr.forEach((v, i) => i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)));
+    ctx.stroke(); ctx.globalAlpha = 1;
+  }
 
-  // línea wpm (principal)
   ctx.strokeStyle = main; ctx.lineWidth = 2.5;
   ctx.beginPath();
   wpmArr.forEach((v, i) => i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)));
   ctx.stroke();
-  // puntos
   ctx.fillStyle = main;
   wpmArr.forEach((v, i) => { ctx.beginPath(); ctx.arc(X(i), Y(v), 2.5, 0, 7); ctx.fill(); });
 
-  // etiquetas X (algunas)
   ctx.fillStyle = sub; ctx.font = '9px monospace';
   const step = Math.ceil(labels.length / 8);
-  labels.forEach((l, i) => { if (i % step === 0) ctx.fillText(l, X(i) - 6, cssH - 6); });
+  labels.forEach((l, i) => { if (i % step === 0 && l) ctx.fillText(l, X(i) - 6, cssH - 6); });
 }
 
 /* =========================================================
@@ -840,9 +973,16 @@ function getHistory() { return Store.get('tt_history', []); }
 function saveRun(run) {
   const h = getHistory();
   h.push(run);
-  if (h.length > 200) h.shift();
+  while (h.length > 100) h.shift();
   Store.set('tt_history', h);
 }
+// migración: limpiar runs basura de versiones anteriores (0 wpm)
+(() => {
+  const h = getHistory();
+  const clean = h.filter(r => r.wpm > 0);
+  if (clean.length !== h.length) Store.set('tt_history', clean);
+})();
+
 function renderHistory() {
   const h = getHistory();
   const body = $('histBody');
@@ -850,12 +990,13 @@ function renderHistory() {
   body.innerHTML = '';
   if (!h.length) { empty.style.display = 'block'; drawHistChart([]); return; }
   empty.style.display = 'none';
-  // últimas primero
-  h.slice().reverse().slice(0, 30).forEach(r => {
+  h.slice().reverse().slice(0, 30).forEach((r, ri) => {
+    const realIdx = h.length - 1 - ri;
     const d = new Date(r.date);
     const fecha = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${fecha}</td><td style="color:var(--main)">${r.wpm}</td><td>${r.acc}%</td><td>${r.mode}</td><td>${r.consist != null ? r.consist + '%' : '—'}</td>`;
+    tr.innerHTML = `<td>${fecha}</td><td style="color:var(--main)">${r.wpm}</td><td>${r.acc}%</td><td>${r.mode}</td><td>${r.consist != null ? r.consist + '%' : '—'}</td><td>${r.events ? '▶' : ''}</td>`;
+    tr.onclick = () => openRunModal(realIdx);
     body.appendChild(tr);
   });
   drawHistChart(h);
@@ -863,33 +1004,259 @@ function renderHistory() {
 function drawHistChart(h) {
   const canvas = $('histChart');
   if (!h.length) {
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.clientWidth;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = (canvas.clientWidth || 600) * dpr;
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     return;
   }
   const recent = h.slice(-40);
-  const wpm = recent.map(r => r.wpm);
-  const labels = recent.map((r,i) => '');
-  drawLineChart(canvas, wpm, wpm.map(()=>0), labels.map((_,i)=> (i % 5===0? '#'+(h.length-recent.length+i+1):'') ));
+  drawLineChart(canvas, recent.map(r => r.wpm), recent.map(() => 0),
+    recent.map((_, i) => i % 5 === 0 ? '#' + (h.length - recent.length + i + 1) : ''));
 }
 
 /* =========================================================
-   SONIDO
+   MODAL DE RUN: stats + replay
+   ========================================================= */
+const RP = { timer: null, run: null, typed: [''], wi: 0, i: 0, correct: 0 };
+
+function openRunModal(idx) {
+  const h = getHistory();
+  const run = h[idx];
+  if (!run) return;
+  stopReplay();
+  RP.run = run;
+  const d = new Date(run.date);
+  $('rmTitle').textContent = `Run — ${run.mode}`;
+  $('rmDate').textContent = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+  $('rmWpm').textContent = run.wpm;
+  $('rmRaw').textContent = run.raw != null ? run.raw : '—';
+  $('rmAcc').textContent = run.acc + '%';
+  $('rmConsist').textContent = (run.consist != null ? run.consist : '—') + '%';
+  $('rmTime').textContent = run.time + 's';
+  $('rmErrors').textContent = run.errors != null ? run.errors : '—';
+
+  const hasReplay = !!(run.events && run.events.length && run.words && run.words.length);
+  $('rmNoReplay').style.display = hasReplay ? 'none' : 'block';
+  $('replayWords').style.display = hasReplay ? 'block' : 'none';
+  $('rmPlay').style.display = hasReplay ? 'inline-block' : 'none';
+  $('rmSpeed').style.display = hasReplay ? 'inline-block' : 'none';
+  $('rmLive').textContent = '';
+  if (hasReplay) renderReplayWords(run.words, null);
+
+  $('overlay').classList.add('show');
+  $('runModal').classList.add('show');
+  if (run.series && run.series.length)
+    requestAnimationFrame(() => drawLineChart($('rmChart'), run.series.map(s => s.wpm), run.series.map(s => s.raw || 0), run.series.map(s => s.t + 's')));
+  else
+    requestAnimationFrame(() => drawLineChart($('rmChart'), [], [], []));
+}
+
+function closeRunModal() {
+  stopReplay();
+  $('runModal').classList.remove('show');
+  $('overlay').classList.remove('show');
+  focusInput();
+}
+$('closeRunModal').onclick = closeRunModal;
+
+function renderReplayWords(words, st) {
+  const cont = $('replayWords');
+  let html = '';
+  words.forEach((w, i) => {
+    html += `<span class="word" data-w="${i}">`;
+    for (const ch of w) html += `<span class="letter">${ch}</span>`;
+    html += `</span>`;
+  });
+  cont.innerHTML = html;
+}
+
+function applyReplayKey(k) {
+  const st = RP;
+  const target = st.run.words[st.wi] || '';
+  if (k === ' ') {
+    if ((st.typed[st.wi] || '').length === 0) return;
+    paintReplayWord(st.wi);
+    st.wi++;
+    if (!st.typed[st.wi]) st.typed[st.wi] = '';
+  } else if (k === 'B') {
+    let t = st.typed[st.wi] || '';
+    if (t.length > 0) st.typed[st.wi] = t.slice(0, -1);
+    else if (st.wi > 0) st.wi--;
+    paintReplayWord(st.wi);
+  } else if (k.length === 1) {
+    const t = st.typed[st.wi] || '';
+    if (t.length >= target.length + 10) return;
+    st.typed[st.wi] = t + k;
+    if (k === target[t.length]) st.correct++;
+    paintReplayWord(st.wi);
+  }
+  paintReplayCaret();
+}
+
+function paintReplayWord(i) {
+  paintWord(i, $('replayWords'), { words: RP.run.words, typed: RP.typed, wi: RP.wi });
+}
+function paintReplayCaret() {
+  const cont = $('replayWords');
+  cont.querySelectorAll('.rp-caret').forEach(e => e.classList.remove('rp-caret'));
+  const wordEl = cont.children[RP.wi];
+  if (!wordEl) return;
+  const typed = RP.typed[RP.wi] || '';
+  const letters = wordEl.querySelectorAll('.letter');
+  const le = letters[Math.min(typed.length, letters.length - 1)];
+  if (le) le.classList.add('rp-caret');
+  // auto-scroll del contenedor
+  if (le && le.offsetTop > cont.scrollTop + cont.clientHeight - 40)
+    cont.scrollTop = le.offsetTop - 40;
+}
+
+function startReplay() {
+  stopReplay();
+  const run = RP.run;
+  if (!run || !run.events || !run.events.length) return;
+  RP.typed = ['']; RP.wi = 0; RP.i = 0; RP.correct = 0;
+  renderReplayWords(run.words);
+  $('rmPlay').textContent = '■ parar';
+  const speed = parseFloat($('rmSpeed').value) || 1;
+
+  // línea de tiempo virtual: comprime pausas largas a máx. 2s reales
+  const vt = []; let acc = 0;
+  for (let i = 0; i < run.events.length; i++) {
+    if (i > 0) acc += Math.min(run.events[i].t - run.events[i - 1].t, 2000 * speed);
+    vt.push(acc);
+  }
+  const t0 = performance.now();
+
+  // reloj real: aunque el navegador frene los timeouts, se pone al día
+  function tick() {
+    const elapsed = (performance.now() - t0) * speed;
+    let last = null;
+    while (RP.i < run.events.length && vt[RP.i] <= elapsed) {
+      last = run.events[RP.i];
+      applyReplayKey(last.k);
+      RP.i++;
+    }
+    if (last) {
+      const mins = last.t / 60000;
+      const wpm = mins > 0.01 ? Math.round((RP.correct / 5) / mins) : 0;
+      $('rmLive').textContent = `${(last.t / 1000).toFixed(1)}s · ${wpm} wpm`;
+    }
+    if (RP.i >= run.events.length) {
+      $('rmPlay').textContent = '▶ reproducir';
+      $('rmLive').textContent += ' · fin';
+      RP.timer = null;
+      return;
+    }
+    RP.timer = setTimeout(tick, 30);
+  }
+  tick();
+}
+function stopReplay() {
+  if (RP.timer) { clearTimeout(RP.timer); RP.timer = null; }
+  $('rmPlay').textContent = '▶ reproducir';
+}
+$('rmPlay').onclick = () => { RP.timer ? stopReplay() : startReplay(); };
+
+/* =========================================================
+   SONIDOS DE TECLADO (WebAudio, sintetizados)
    ========================================================= */
 let audioCtx = null;
-function playSound() {
-  if (S.sound !== 'on') return;
-  try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = 'triangle';
-    o.frequency.value = 440 + Math.random() * 120;
-    g.gain.value = 0.04;
-    o.connect(g); g.connect(audioCtx.destination);
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function vol() { return (S.volume / 100) * 0.25; }
+
+function noiseBuffer(ctx, dur) {
+  const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  return buf;
+}
+
+const SOUNDS = {
+  beep(ctx) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = 480 + Math.random() * 100;
+    g.gain.value = vol();
+    o.connect(g); g.connect(ctx.destination);
     o.start();
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.06);
-    o.stop(audioCtx.currentTime + 0.07);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
+    o.stop(ctx.currentTime + 0.07);
+  },
+  click(ctx) {
+    const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx, 0.03);
+    const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 2500;
+    const g = ctx.createGain(); g.gain.value = vol() * 1.4;
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
+  },
+  thock(ctx) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(150 + Math.random() * 40, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.05);
+    g.gain.value = vol() * 2;
+    o.connect(g); g.connect(ctx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.07);
+    o.stop(ctx.currentTime + 0.08);
+    const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx, 0.015);
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1200;
+    const g2 = ctx.createGain(); g2.gain.value = vol() * 0.7;
+    src.connect(f); f.connect(g2); g2.connect(ctx.destination);
+    src.start();
+    g2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.015);
+  },
+  pop(ctx) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(420, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.05);
+    g.gain.value = vol() * 1.6;
+    o.connect(g); g.connect(ctx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
+    o.stop(ctx.currentTime + 0.07);
+  },
+  typewriter(ctx) {
+    const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx, 0.04);
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1100; f.Q.value = 1.2;
+    const g = ctx.createGain(); g.gain.value = vol() * 2;
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.04);
+    const o = ctx.createOscillator(), g2 = ctx.createGain();
+    o.type = 'square'; o.frequency.value = 2200;
+    g2.gain.value = vol() * 0.25;
+    o.connect(g2); g2.connect(ctx.destination);
+    o.start();
+    g2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.012);
+    o.stop(ctx.currentTime + 0.015);
+  },
+  error(ctx) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'square'; o.frequency.value = 110;
+    g.gain.value = vol() * 0.9;
+    o.connect(g); g.connect(ctx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
+    o.stop(ctx.currentTime + 0.1);
+  }
+};
+
+function playKeySound(correct) {
+  try {
+    if (!correct && S.errSound === 'on') {
+      const ctx = getCtx(); if (ctx) SOUNDS.error(ctx);
+      return;
+    }
+    if (S.sound === 'off') return;
+    const ctx = getCtx(); if (!ctx) return;
+    (SOUNDS[S.sound] || SOUNDS.beep)(ctx);
   } catch (e) {}
 }
 
@@ -897,14 +1264,12 @@ function playSound() {
    FOCO
    ========================================================= */
 function focusInput() { hidden.focus({ preventScroll: true }); typeWrap.classList.remove('unfocused'); }
-hidden.addEventListener('blur', () => { if (state && state.started && !state.finished) typeWrap.classList.add('unfocused'); });
+hidden.addEventListener('blur', () => { if (state && !state.finished) typeWrap.classList.add('unfocused'); });
 hidden.addEventListener('focus', () => typeWrap.classList.remove('unfocused'));
 typeWrap.addEventListener('click', focusInput);
 $('focusWarn').addEventListener('click', focusInput);
 
-/* capturar tecleo desde el input oculto */
 hidden.addEventListener('keydown', (e) => {
-  // atajos
   if (e.key === 'Tab') { e.preventDefault(); newTest(); return; }
   if (e.key === 'Escape') { e.preventDefault(); newTest(); return; }
   if (e.key === 'Backspace') { e.preventDefault(); onInput('Backspace'); return; }
@@ -914,13 +1279,20 @@ hidden.addEventListener('keydown', (e) => {
   }
 });
 
-/* foco global: cualquier tecla (fuera de modal/inputs) enfoca y tipea */
 document.addEventListener('keydown', (e) => {
-  if ($('panel').classList.contains('show')) return;
+  // Esc cierra modales antes que reiniciar
+  if (e.key === 'Escape') {
+    if ($('runModal').classList.contains('show')) { e.preventDefault(); closeRunModal(); return; }
+    if ($('panel').classList.contains('show')) { e.preventDefault(); closePanel(); return; }
+  }
+  if ($('panel').classList.contains('show') || $('runModal').classList.contains('show')) return;
   if (document.activeElement === hidden) return;
-  if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
   if (e.key === 'Tab' || e.key === 'Escape') { e.preventDefault(); newTest(); return; }
-  if (e.key.length === 1) focusInput();
+  // primera tecla fuera de foco: no perderla
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault(); focusInput(); onInput(e.key);
+  }
 });
 
 /* =========================================================
@@ -932,29 +1304,28 @@ function applySettings() {
   document.documentElement.style.setProperty('--font-size', S.fontSize + 'px');
   $('fontSizeVal').textContent = S.fontSize + 'px';
   $('fontSizeRange').value = S.fontSize;
+  $('volVal').textContent = S.volume + '%';
+  $('volRange').value = S.volume;
 
-  // caret clases
   caretEl.className = '';
   caretEl.classList.add(S.caret);
   if (S.anim === 'smooth') caretEl.classList.add('smooth');
   caretEl.classList.add('blink');
 
-  // modo de movimiento
   typeArea.classList.toggle('smooth-scroll', S.move === 'text');
 
-  // marcar botones activos
   markActive('themeOpts', 'theme', S.theme);
   markActive('fontOpts', 'font', S.font);
   markActive('moveOpts', 'move', S.move);
   markActive('caretOpts', 'caret', S.caret);
   markActive('caretAnimOpts', 'anim', S.anim);
   markActive('soundOpts', 'sound', S.sound);
+  markActive('errSoundOpts', 'errsound', S.errSound);
 
-  // barra de config
   markConfig();
   $('customText').value = S.customText || '';
 
-  if (state) { positionCaret(); }
+  if (state) positionCaret();
 }
 function markActive(containerId, attr, val) {
   $(containerId).querySelectorAll('.opt').forEach(b =>
@@ -962,11 +1333,9 @@ function markActive(containerId, attr, val) {
 }
 function saveSettings() { Store.set('tt_settings', S); }
 
-/* barra de config (tipo de test, cantidad, idioma) */
 function markConfig() {
   $('grpType').querySelectorAll('.config-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === S.testType));
-  // cantidades
   const amtWrap = $('grpAmount');
   if (S.testType === 'custom') { amtWrap.style.display = 'none'; }
   else {
@@ -980,16 +1349,14 @@ function markConfig() {
       amtWrap.appendChild(b);
     });
   }
-  // idioma solo si no es custom
-  $('grpLang').style.display = S.testType === 'custom' ? 'none' : 'flex';
-  $('grpLang').querySelectorAll('.config-btn').forEach(b =>
-    b.classList.toggle('active', b.dataset.lang === S.lang));
+  $('grpDiff').style.display = S.testType === 'custom' ? 'none' : 'flex';
+  $('grpDiff').querySelectorAll('.config-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.diff === S.difficulty));
 }
 
 /* =========================================================
    LISTENERS DE LA UI
    ========================================================= */
-// barra: tipo de test
 $('grpType').querySelectorAll('.config-btn').forEach(b => {
   b.onclick = () => {
     S.testType = b.dataset.mode;
@@ -998,23 +1365,31 @@ $('grpType').querySelectorAll('.config-btn').forEach(b => {
     saveSettings(); markConfig(); newTest();
   };
 });
-// barra: idioma
-$('grpLang').querySelectorAll('.config-btn').forEach(b => {
-  b.onclick = () => { S.lang = b.dataset.lang; saveSettings(); markConfig(); newTest(); };
+$('grpDiff').querySelectorAll('.config-btn').forEach(b => {
+  b.onclick = () => { S.difficulty = b.dataset.diff; saveSettings(); markConfig(); newTest(); };
 });
 
-// panel settings
 $('openSettings').onclick = () => { $('overlay').classList.add('show'); $('panel').classList.add('show'); };
 function closePanel() { $('overlay').classList.remove('show'); $('panel').classList.remove('show'); focusInput(); }
 $('closeSettings').onclick = closePanel;
-$('overlay').onclick = closePanel;
+$('overlay').onclick = () => {
+  if ($('runModal').classList.contains('show')) closeRunModal();
+  else closePanel();
+};
 
 $('themeOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.theme = b.dataset.theme; applySettings(); saveSettings(); drawHistChart(getHistory()); });
 $('fontOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.font = b.dataset.font; applySettings(); saveSettings(); requestAnimationFrame(positionCaret); });
 $('moveOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.move = b.dataset.move; applySettings(); saveSettings(); newTest(); });
 $('caretOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.caret = b.dataset.caret; applySettings(); saveSettings(); requestAnimationFrame(positionCaret); });
 $('caretAnimOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.anim = b.dataset.anim; applySettings(); saveSettings(); });
-$('soundOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => { S.sound = b.dataset.sound; applySettings(); saveSettings(); });
+$('soundOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => {
+  S.sound = b.dataset.sound; applySettings(); saveSettings();
+  if (S.sound !== 'off') { const ctx = getCtx(); if (ctx) (SOUNDS[S.sound] || SOUNDS.beep)(ctx); } // preview del sonido
+});
+$('errSoundOpts').querySelectorAll('.opt').forEach(b => b.onclick = () => {
+  S.errSound = b.dataset.errsound; applySettings(); saveSettings();
+  if (S.errSound === 'on') { const ctx = getCtx(); if (ctx) SOUNDS.error(ctx); }
+});
 
 $('fontSizeRange').oninput = (e) => {
   S.fontSize = +e.target.value; $('fontSizeVal').textContent = S.fontSize + 'px';
@@ -1022,13 +1397,20 @@ $('fontSizeRange').oninput = (e) => {
   requestAnimationFrame(positionCaret);
 };
 $('fontSizeRange').onchange = () => saveSettings();
+$('volRange').oninput = (e) => { S.volume = +e.target.value; $('volVal').textContent = S.volume + '%'; };
+$('volRange').onchange = () => {
+  saveSettings();
+  if (S.sound !== 'off') { const ctx = getCtx(); if (ctx) (SOUNDS[S.sound] || SOUNDS.beep)(ctx); }
+};
 
 $('customText').addEventListener('input', (e) => { S.customText = e.target.value; saveSettings(); });
 
 $('restartBtn').onclick = newTest;
 $('logoHome').onclick = newTest;
 $('clearHist').onclick = () => {
-  if (confirm('¿Borrar todo el historial de runs?')) { Store.del('tt_history'); renderHistory(); }
+  if (confirm('¿Borrar todo el historial de runs y los PB?')) {
+    Store.del('tt_history'); Store.del('tt_pb'); renderHistory();
+  }
 };
 
 window.addEventListener('resize', () => {
