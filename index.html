@@ -103,7 +103,7 @@
     overflow: hidden;
   }
   #typeArea .word { display: inline-block; margin: 0 .3em; }
-  #typeArea.smooth-scroll #words { display: inline-block; transition: transform .12s linear; }
+  #typeArea.smooth-scroll #words { display: inline-block; transition: transform .2s ease; }
   #typeArea:not(.smooth-scroll) #words { display: block; }
   .letter { position: relative; }
   .letter.correct { color: var(--correct); }
@@ -167,6 +167,21 @@
   .save-btn:hover { border-color: var(--main); color: var(--main); }
   .save-btn:disabled { opacity: .5; cursor: default; }
   .save-note { color: var(--sub); font-size: 12px; }
+
+  /* ============ PERFIL ============ */
+  .profile-summary { color: var(--sub); font-size: 12px; margin-bottom: 12px; }
+  .profile-summary b { color: var(--main); font-weight: 600; }
+  .pb-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .pb-card {
+    background: var(--bg-alt); border-radius: 10px; padding: 14px; cursor: pointer;
+    border: 1px solid transparent; transition: border-color .15s, transform .15s;
+  }
+  .pb-card:hover { border-color: var(--main); transform: translateY(-2px); }
+  .pb-card .mode { color: var(--sub); font-size: 11px; margin-bottom: 6px; }
+  .pb-card .wpm { color: var(--main); font-size: 30px; font-weight: 600; line-height: 1; }
+  .pb-card .wpm small { font-size: 12px; color: var(--sub); font-weight: 400; }
+  .pb-card .meta { color: var(--sub); font-size: 11px; margin-top: 8px; display: flex; justify-content: space-between; gap: 6px; }
+  .pb-card .replay-tag { color: var(--main); }
 
   /* ============ HISTORIAL ============ */
   .history-sec { width: 100%; max-width: 1000px; margin: 10px auto 40px; padding: 0 20px; }
@@ -292,6 +307,7 @@
     <button class="config-btn" data-diff="easy">fácil</button>
     <button class="config-btn" data-diff="medium">normal</button>
     <button class="config-btn" data-diff="hard">difícil</button>
+    <button class="config-btn" data-diff="random">random</button>
   </div>
 </div>
 
@@ -341,6 +357,14 @@
     </div>
   </div>
 </main>
+
+<!-- PERFIL: mejores runs por modo -->
+<div class="history-sec" id="profileSec">
+  <h2>Perfil — mis mejores runs</h2>
+  <div class="profile-summary" id="profSummary"></div>
+  <div class="pb-cards" id="pbCards"></div>
+  <div class="empty-hist" id="emptyProf">Tus PB van a aparecer acá cuando completes runs. Click en uno para ver stats y replay.</div>
+</div>
 
 <!-- HISTORIAL -->
 <div class="history-sec">
@@ -512,7 +536,15 @@ const W_MEDIUM = ("ability absence academy account accurate achieve acquire addr
 
 const W_HARD = ("abbreviation absolutely accommodate accomplishment accountability acknowledgment acquisition administration advertisement agriculture algorithm alternative ambiguous amendment anniversary announcement anticipate apparatus appreciation appropriate approximately arbitrary archaeology architecture arrangement assassination assessment assignment association assumption astonishing atmosphere authentic authority automatically availability bacteria bankruptcy beneficial biography boundary breakthrough broadcasting bureaucracy calculation candidate capability catastrophe celebration certificate characteristic chromosome circumstance civilization classification collaborate combination commemorate commentary commercial commission commitment communication community comparison compatibility compensation competition complicated comprehension compromise concentration conclusion confidential configuration confrontation congratulate congressional connection consciousness consequence conservative considerable conspiracy constellation constitution construction consultant contemporary continuously contradiction contribution controversial convenience conventional conversation cooperation coordination correspondence corruption counterpart courageous creativity credibility curriculum customary decision declaration dedication deficiency definitely deliberately democracy demonstration department dependency description desperately destination deterioration determination development dictionary differentiate difficulty dimension diplomatic disability disappointment disciplinary discrimination distinguish distribution documentary documentation dramatically eccentric economics editorial effectiveness efficiency electricity elementary embarrassment emergency emphasize encouragement encyclopedia engineering enthusiasm entrepreneur environment equilibrium equivalent essentially establishment evaluation eventually evolution exaggerate examination exceptional executive exhibition expectation expedition experimental explanation extension extraordinary fascinating financial flexibility fluctuation foundation framework frequency fundamental furthermore generation generosity geography government gradually grammatical gratitude guarantee gymnasium hallucination headquarters hemisphere hierarchy historical horizontal hospitality humanitarian hypothesis identification illustration imagination immediately immigration implementation impossible impression improvement incomprehensible incorporate incredible independence indication individual industrial inevitable influential information infrastructure ingredient inhabitant initiative innovation inspiration installation institution instruction instrument insurance integration intellectual intelligence intention interaction international interpretation intersection intervention introduction investigation invitation irrelevant jurisdiction justification kaleidoscope kilometer knowledge laboratory landscape legislation legitimate lieutenant literature longitude magnificent maintenance management manufacture mathematics measurement mechanism medication membership metropolitan microphone millennium miscellaneous misunderstanding modification momentum monument motivation multimedia municipal mysterious necessarily negotiation neighborhood nevertheless nomination notorious nutrition obligation observation occasionally occupation operation opportunity opposition optimistic organization orientation overwhelming parliament participant participation particularly partnership perception performance permanent permission perpendicular persistence personality perspective persuasion phenomenon philosophy photograph photography physician politician population possession potentially practically precedent precisely prediction predecessor preference preliminary preparation prescription presentation preservation presidential presumably prevention previously primarily principle priority probability procedure proclamation production professional proficiency progression prohibition projection prominent pronunciation proportion proposition prosecution prosperity protection psychological psychology publication punishment qualification quantity questionnaire radiation reaction reasonable recognition recommendation reconciliation recreation reduction redundant reference refrigerator registration regulation rehabilitation relationship relatively reluctant remarkable repetition representative reputation requirement reservation residential resignation resolution responsibility restaurant restriction retirement revolutionary satisfaction scholarship scientific sculpture secondary secretary segregation sensitive separation settlement significance significantly simultaneously situation sophisticated specialist specifically spectacular speculation spontaneous statistics stimulation straightforward strategic structural subscription substantial substitute successfully sufficient suggestion supervision supplement surveillance susceptible suspension sympathetic symptom synthesis systematic technological telescope temperature temporary terminology territory testimony theoretical thermometer thoroughly tournament traditional trajectory transaction transformation transition transportation tremendous triumphant ultimately unanimous uncertainty unconscious undergraduate understanding undoubtedly unemployment unexpectedly unfortunately universal university unprecedented vaccination variation vegetable vegetation versatile vertical victorious vocabulary volcanic volunteer vulnerable warehouse watermelon wilderness withdrawal").split(" ");
 
-const POOLS = { easy: W_EASY, medium: W_MEDIUM, hard: W_HARD };
+// diccionario unificado, sin duplicados, reacomodado por dificultad real:
+// fácil = palabras cortas, normal = medias, difícil = largas, random = todas
+const ALL_WORDS = [...new Set(W_EASY.concat(W_MEDIUM, W_HARD))];
+const POOLS = {
+  easy: ALL_WORDS.filter(w => w.length <= 5),
+  medium: ALL_WORDS.filter(w => w.length >= 4 && w.length <= 8),
+  hard: ALL_WORDS.filter(w => w.length >= 9),
+  random: ALL_WORDS
+};
 
 /* =========================================================
    ESTADO Y SETTINGS
@@ -656,43 +688,40 @@ function positionCaret() {
   if (!wordEl) return;
   const typed = state.typed[wi] || '';
   const letters = wordEl.querySelectorAll('.letter');
-  let rect, left, top;
-  const areaRect = typeArea.getBoundingClientRect();
 
+  // coordenadas de LAYOUT (offsetLeft/Top): no las afecta el transform,
+  // así el corrimiento no se realimenta a sí mismo
+  let left, top;
   if (typed.length === 0) {
-    if (letters[0]) {
-      rect = letters[0].getBoundingClientRect();
-      left = rect.left - areaRect.left; top = rect.top - areaRect.top;
-    } else { left = 0; top = 0; }
+    const le = letters[0];
+    left = le ? le.offsetLeft : wordEl.offsetLeft;
+    top = le ? le.offsetTop : wordEl.offsetTop;
+  } else if (typed.length >= letters.length) {
+    const le = letters[letters.length - 1];
+    left = le.offsetLeft + le.offsetWidth;
+    top = le.offsetTop;
   } else {
-    if (typed.length >= letters.length) {
-      rect = letters[letters.length - 1].getBoundingClientRect();
-      left = rect.right - areaRect.left;
-    } else {
-      rect = letters[typed.length].getBoundingClientRect();
-      left = rect.left - areaRect.left;
-    }
-    top = rect.top - areaRect.top;
+    const le = letters[typed.length];
+    left = le.offsetLeft;
+    top = le.offsetTop;
   }
 
   if (S.move === 'text') {
+    // salto por palabra: la palabra actual queda centrada y el caret
+    // se mueve dentro de ella; al pasar a la siguiente, el texto salta
     const centerX = typeArea.clientWidth / 2;
-    const shift = Math.max(0, left - centerX);
+    const shift = Math.max(0, wordEl.offsetLeft + wordEl.offsetWidth / 2 - centerX);
     wordsEl.style.transform = `translateX(${-shift}px)`;
     caretEl.style.left = (left - shift) + 'px';
     caretEl.style.top = top + 'px';
   } else {
+    const lineH = parseFloat(getComputedStyle(typeArea).fontSize) * 1.6;
+    const lineIdx = Math.round(top / lineH);
+    const offset = Math.max(0, lineIdx - 1) * lineH;
+    wordsEl.style.transform = `translateY(${-offset}px)`;
     caretEl.style.left = left + 'px';
-    caretEl.style.top = top + 'px';
-    scrollToLine(top);
+    caretEl.style.top = (top - offset) + 'px';
   }
-}
-
-function scrollToLine(top) {
-  const lineH = parseFloat(getComputedStyle(typeArea).fontSize) * 1.6;
-  const offset = Math.max(0, Math.floor((top + 2) / lineH) - 1) * lineH;
-  wordsEl.style.transform = `translateY(${-offset}px)`;
-  caretEl.style.transform = `translateY(${-offset}px)`;
 }
 
 /* =========================================================
@@ -820,7 +849,7 @@ function modeKey() {
   return `${S.testType}-${S.amount}-${S.difficulty}`;
 }
 function modeLabel() {
-  const diff = { easy: 'fácil', medium: 'normal', hard: 'difícil' }[S.difficulty];
+  const diff = { easy: 'fácil', medium: 'normal', hard: 'difícil', random: 'random' }[S.difficulty];
   if (S.testType === 'time') return `tiempo ${S.amount}s · ${diff}`;
   if (S.testType === 'words') return `${S.amount} palabras · ${diff}`;
   return 'texto propio';
@@ -983,7 +1012,43 @@ function saveRun(run) {
   if (clean.length !== h.length) Store.set('tt_history', clean);
 })();
 
+/* perfil: la mejor run guardada de cada modo, con acceso a stats y replay */
+function renderProfile() {
+  const h = getHistory();
+  const cards = $('pbCards'), empty = $('emptyProf'), summary = $('profSummary');
+  cards.innerHTML = '';
+  if (!h.length) { empty.style.display = 'block'; summary.textContent = ''; return; }
+  empty.style.display = 'none';
+
+  const best = {};
+  h.forEach((r, i) => {
+    const k = r.key || r.mode;
+    if (best[k] == null || r.wpm > h[best[k]].wpm) best[k] = i;
+  });
+  const idxs = Object.values(best).sort((a, b) => h[b].wpm - h[a].wpm);
+
+  const totalMin = h.reduce((a, r) => a + (r.time || 0), 0) / 60;
+  summary.innerHTML = `<b>${h.length}</b> runs guardadas · <b>${totalMin < 1 ? '<1' : Math.round(totalMin)}</b> min tipeados · mejor: <b>${h[idxs[0]].wpm} wpm</b>`;
+
+  idxs.forEach(i => {
+    const r = h[i];
+    const d = new Date(r.date);
+    const card = document.createElement('div');
+    card.className = 'pb-card';
+    card.innerHTML = `
+      <div class="mode">${r.mode}</div>
+      <div class="wpm">${r.wpm}<small> wpm</small></div>
+      <div class="meta">
+        <span>${r.acc}% acc · ${d.toLocaleDateString()}</span>
+        <span class="replay-tag">${r.events && r.events.length ? '▶ replay' : ''}</span>
+      </div>`;
+    card.onclick = () => openRunModal(i);
+    cards.appendChild(card);
+  });
+}
+
 function renderHistory() {
+  renderProfile();
   const h = getHistory();
   const body = $('histBody');
   const empty = $('emptyHist');
