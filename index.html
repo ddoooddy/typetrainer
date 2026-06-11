@@ -536,11 +536,14 @@ const W_MEDIUM = ("ability absence academy account accurate achieve acquire addr
 
 const W_HARD = ("abbreviation absolutely accommodate accomplishment accountability acknowledgment acquisition administration advertisement agriculture algorithm alternative ambiguous amendment anniversary announcement anticipate apparatus appreciation appropriate approximately arbitrary archaeology architecture arrangement assassination assessment assignment association assumption astonishing atmosphere authentic authority automatically availability bacteria bankruptcy beneficial biography boundary breakthrough broadcasting bureaucracy calculation candidate capability catastrophe celebration certificate characteristic chromosome circumstance civilization classification collaborate combination commemorate commentary commercial commission commitment communication community comparison compatibility compensation competition complicated comprehension compromise concentration conclusion confidential configuration confrontation congratulate congressional connection consciousness consequence conservative considerable conspiracy constellation constitution construction consultant contemporary continuously contradiction contribution controversial convenience conventional conversation cooperation coordination correspondence corruption counterpart courageous creativity credibility curriculum customary decision declaration dedication deficiency definitely deliberately democracy demonstration department dependency description desperately destination deterioration determination development dictionary differentiate difficulty dimension diplomatic disability disappointment disciplinary discrimination distinguish distribution documentary documentation dramatically eccentric economics editorial effectiveness efficiency electricity elementary embarrassment emergency emphasize encouragement encyclopedia engineering enthusiasm entrepreneur environment equilibrium equivalent essentially establishment evaluation eventually evolution exaggerate examination exceptional executive exhibition expectation expedition experimental explanation extension extraordinary fascinating financial flexibility fluctuation foundation framework frequency fundamental furthermore generation generosity geography government gradually grammatical gratitude guarantee gymnasium hallucination headquarters hemisphere hierarchy historical horizontal hospitality humanitarian hypothesis identification illustration imagination immediately immigration implementation impossible impression improvement incomprehensible incorporate incredible independence indication individual industrial inevitable influential information infrastructure ingredient inhabitant initiative innovation inspiration installation institution instruction instrument insurance integration intellectual intelligence intention interaction international interpretation intersection intervention introduction investigation invitation irrelevant jurisdiction justification kaleidoscope kilometer knowledge laboratory landscape legislation legitimate lieutenant literature longitude magnificent maintenance management manufacture mathematics measurement mechanism medication membership metropolitan microphone millennium miscellaneous misunderstanding modification momentum monument motivation multimedia municipal mysterious necessarily negotiation neighborhood nevertheless nomination notorious nutrition obligation observation occasionally occupation operation opportunity opposition optimistic organization orientation overwhelming parliament participant participation particularly partnership perception performance permanent permission perpendicular persistence personality perspective persuasion phenomenon philosophy photograph photography physician politician population possession potentially practically precedent precisely prediction predecessor preference preliminary preparation prescription presentation preservation presidential presumably prevention previously primarily principle priority probability procedure proclamation production professional proficiency progression prohibition projection prominent pronunciation proportion proposition prosecution prosperity protection psychological psychology publication punishment qualification quantity questionnaire radiation reaction reasonable recognition recommendation reconciliation recreation reduction redundant reference refrigerator registration regulation rehabilitation relationship relatively reluctant remarkable repetition representative reputation requirement reservation residential resignation resolution responsibility restaurant restriction retirement revolutionary satisfaction scholarship scientific sculpture secondary secretary segregation sensitive separation settlement significance significantly simultaneously situation sophisticated specialist specifically spectacular speculation spontaneous statistics stimulation straightforward strategic structural subscription substantial substitute successfully sufficient suggestion supervision supplement surveillance susceptible suspension sympathetic symptom synthesis systematic technological telescope temperature temporary terminology territory testimony theoretical thermometer thoroughly tournament traditional trajectory transaction transformation transition transportation tremendous triumphant ultimately unanimous uncertainty unconscious undergraduate understanding undoubtedly unemployment unexpectedly unfortunately universal university unprecedented vaccination variation vegetable vegetation versatile vertical victorious vocabulary volcanic volunteer vulnerable warehouse watermelon wilderness withdrawal").split(" ");
 
-// diccionario unificado, sin duplicados, reacomodado por dificultad real:
-// fácil = palabras cortas, normal = medias, difícil = largas, random = todas
-const ALL_WORDS = [...new Set(W_EASY.concat(W_MEDIUM, W_HARD))];
+// fácil = lista curada de las palabras MÁS FRECUENTES del inglés (cortas y conocidas),
+// no un filtro por longitud: corto no implica fácil ("wax", "vivid"...)
+const W_COMMON = ("the be of and a to in he have it that for they i with as not on she at by this we you do but from or which one would all will there say who make when can more if no man out other so what time up go about than into could state only new year some take come these know see use get like then first any work now may such give over think most even find day also after way many must look before great back long where much should well people down own just good each those feel seem how high too place little world very still hand old life tell write become here show house both need mean call under last right move thing school never same begin while number part turn real leave might want point form off child few small since ask late home large person end open public hold head word lead system set order eye plan run keep face fact group play stand early course change help line city put close case force meet once water upon war build hear light live every bring center let side try name power pay result study woman member until far night always away report week church toward start social room figure nature though young less enough almost read story food sure mind city girl boy car door book love play").split(" ");
+
+// diccionario unificado para el resto de dificultades
+const ALL_WORDS = [...new Set(W_COMMON.concat(W_EASY, W_MEDIUM, W_HARD))];
 const POOLS = {
-  easy: ALL_WORDS.filter(w => w.length <= 5),
+  easy: [...new Set(W_COMMON)].filter(w => w.length <= 6),
   medium: ALL_WORDS.filter(w => w.length >= 4 && w.length <= 8),
   hard: ALL_WORDS.filter(w => w.length >= 9),
   random: ALL_WORDS
@@ -598,8 +601,8 @@ function genWords(n) {
 
 function clearTimers() {
   if (!state) return;
-  clearInterval(state.timer); clearInterval(state.sampleTimer);
-  state.timer = null; state.sampleTimer = null;
+  clearInterval(state.timer); clearInterval(state.sampleTimer); clearTimeout(state.endTimer);
+  state.timer = null; state.sampleTimer = null; state.endTimer = null;
 }
 
 function newTest() {
@@ -619,6 +622,7 @@ function newTest() {
     finished: false,
     timer: null,
     sampleTimer: null,
+    endTimer: null,
     wpmSeries: [],
     events: [],
     correctChars: 0,
@@ -741,6 +745,9 @@ function onInput(key) {
 
   if (key === ' ') {
     if ((state.typed[state.wi] || '').length === 0) return;
+    // el espacio cuenta como caracter: estándar WPM = 1 palabra son 5 chars CON espacio
+    if (state.typed[state.wi] === target) state.correctChars++;
+    else state.incorrectChars++;
     paintWord(state.wi);
     state.wi++;
     if (!state.typed[state.wi]) state.typed[state.wi] = '';
@@ -803,13 +810,14 @@ function startTest() {
   }, 1000);
 
   if (S.testType === 'time') {
-    // countdown basado en tiempo real (sin drift ni stacking)
+    // fin EXACTO a los N segundos (el intervalo queda solo para mostrar el countdown)
+    state.endTimer = setTimeout(finishTest, S.amount * 1000);
     state.timer = setInterval(() => {
       if (state.finished) return;
       const elapsed = (performance.now() - state.startTime) / 1000;
       const remaining = Math.max(0, Math.ceil(S.amount - elapsed));
       $('liveTime').innerHTML = remaining + '<small>tiempo</small>';
-      if (elapsed >= S.amount) finishTest();
+      if (elapsed >= S.amount + 0.5) finishTest(); // backup por si el timeout se throttlea
     }, 200);
   }
 }
@@ -860,7 +868,9 @@ function finishTest() {
   state.finished = true;
   clearTimers();
 
-  const elapsed = Math.max(0.5, (performance.now() - state.startTime) / 1000);
+  // en modo tiempo el test dura EXACTAMENTE lo configurado
+  let elapsed = Math.max(0.5, (performance.now() - state.startTime) / 1000);
+  if (S.testType === 'time') elapsed = Math.min(elapsed, S.amount);
   const { wpm, raw } = calcWpm(elapsed);
   const acc = accuracy();
   // punto final para que el gráfico siempre tenga datos
